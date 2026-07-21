@@ -1,0 +1,46 @@
+---
+// Copyright (c) 2026 Zeke Sikelianos
+// Licensed under the Apache 2.0 license found in the LICENSE file or at:
+//     https://opensource.org/licenses/Apache-2.0
+
+// Renders a copy-paste-ready prompt for the student to hand to Pi. The
+// prompt links back to this lesson's slug so Pi can fetch the lesson content
+// and agentInstructions via the API, and includes the student ID (once
+// enrollment exists) so Pi can track progress.
+interface Props {
+	title: string;
+	prompt?: string;
+}
+
+const { title, prompt } = Astro.props;
+const defaultPrompt = `Let's work on the "${title}" lesson from Pi School.`;
+const text = prompt ?? defaultPrompt;
+---
+
+<div class="agent-prompt not-prose my-6 rounded-xl border border-gray-200 dark:border-stone-700/50 overflow-hidden">
+  <div class="flex items-center justify-between px-4 py-2 bg-gray-50 dark:bg-stone-900/80 border-b border-gray-200 dark:border-stone-700/50">
+    <span class="text-xs font-mono uppercase tracking-wider text-gray-500 dark:text-stone-400">Prompt for Pi</span>
+    <button type="button" class="agent-prompt-copy px-2.5 py-1 text-xs font-mono font-medium rounded transition-colors cursor-pointer theme-button">Copy</button>
+  </div>
+  <pre class="agent-prompt-text px-4 py-3 font-mono text-sm overflow-x-auto whitespace-pre-wrap leading-relaxed">{text}</pre>
+</div>
+
+<script>
+	document.addEventListener("DOMContentLoaded", () => {
+		for (const container of document.querySelectorAll(".agent-prompt")) {
+			const button = container.querySelector(".agent-prompt-copy");
+			const textEl = container.querySelector(".agent-prompt-text");
+			if (!(button instanceof HTMLButtonElement) || !textEl) continue;
+
+			button.addEventListener("click", () => {
+				navigator.clipboard.writeText(textEl.textContent ?? "").then(() => {
+					const original = button.textContent;
+					button.textContent = "Copied!";
+					setTimeout(() => {
+						button.textContent = original;
+					}, 2000);
+				});
+			});
+		}
+	});
+</script>

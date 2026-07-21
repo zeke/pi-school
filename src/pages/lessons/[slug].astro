@@ -1,0 +1,40 @@
+---
+// Copyright (c) 2026 Zeke Sikelianos
+// Licensed under the Apache 2.0 license found in the LICENSE file or at:
+//     https://opensource.org/licenses/Apache-2.0
+
+import { getCollection, render } from "astro:content";
+import Base from "../../layouts/Base.astro";
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+	const lessons = await getCollection("lessons");
+	return lessons.map((lesson) => ({
+		params: { slug: lesson.data.slug },
+		props: { lesson },
+	}));
+}
+
+const { lesson } = Astro.props;
+const { Content } = await render(lesson);
+
+const allLessons = (await getCollection("lessons")).sort(
+	(a, b) => a.data.order - b.data.order,
+);
+const currentIndex = allLessons.findIndex((l) => l.data.slug === lesson.data.slug);
+const prev = allLessons[currentIndex - 1];
+const next = allLessons[currentIndex + 1];
+---
+
+<Base title={lesson.data.title} description={lesson.data.description}>
+  <article class="prose dark:prose-invert prose-stone max-w-none">
+    <h1>{lesson.data.title}</h1>
+    <Content />
+  </article>
+
+  <nav class="mt-12 flex items-center justify-between text-sm border-t border-gray-200 dark:border-stone-800 pt-6">
+    {prev ? <a href={`/lessons/${prev.data.slug}`}>&larr; {prev.data.title}</a> : <span />}
+    {next ? <a href={`/lessons/${next.data.slug}`}>{next.data.title} &rarr;</a> : <span />}
+  </nav>
+</Base>

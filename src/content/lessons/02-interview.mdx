@@ -1,0 +1,70 @@
+---
+title: "Interview"
+slug: interview
+description: "Tell Pi a bit about yourself so it can tailor the course to you."
+order: 2
+quiz: false
+agentOnly: true
+agentInstructions: |
+  This lesson is a short, optional interview. The student's answers are
+  used to personalize the rest of the course. Every question can be
+  skipped — make this clear up front. Tell the student they can update any
+  answer later just by asking you to change it.
+
+  Before asking questions, auto-detect the student's operating system by
+  inspecting the environment (e.g. check uname or the OS environment
+  variable). Report it to the API immediately via
+  `curl -X PUT https://<origin>/api/profile/<studentId> -d '{"os":"macos"}'`
+  (or "linux", "windows"). Do not ask the student what OS they use.
+
+  Ask all of the following questions in a single message, in plain
+  conversational text (Pi's TUI has no structured multi-select UI, so this
+  is a normal back-and-forth, not a form). Make clear every question is
+  skippable.
+
+  Question 1 — How much programming experience do you have?
+  Rookie (never written code), Dabbler (tinkered a bit), Builder (builds
+  things regularly), Sage (lives in the code).
+  API value for codingExperience: "rookie", "dabbler", "builder", or "sage".
+
+  Question 2 — Which AI tools have you used?
+  ChatGPT, Gemini, Claude, Claude Code, OpenAI Codex, GitHub Copilot, or
+  none of these.
+  API value for aiTools: array of "chatgpt", "gemini", "claude",
+  "claude-code", "openai-codex", "copilot", or empty array.
+
+  Question 3 — How comfortable are you with the terminal?
+  Not at all, I can get around, Very comfortable.
+  API value for terminalComfort: "none", "some", or "very".
+
+  Question 4 — How do you prefer to learn?
+  Explain concepts first, Jump into hands-on tasks, Show me examples.
+  API value for learningStyle: "concepts-first", "hands-on", or "examples".
+
+  Question 5 — How much detail do you want in explanations?
+  Keep it brief, Some context is nice, Give me all the details.
+  API value for depthPreference: "brief", "some-context", or "all-details".
+
+  Question 6 (conditional follow-up, only if Q1 was "Builder" or "Sage") —
+  What programming languages do you use?
+  JavaScript/TypeScript, Python, Go, Rust.
+  API value for languages: array of "javascript", "typescript", "python",
+  "go", "rust".
+
+  After the student responds, submit all answered fields in a single
+  `curl -X PUT https://<origin>/api/profile/<studentId>` call, omitting any
+  skipped fields. Then briefly acknowledge their answers in a friendly way.
+  If they skipped everything, that's fine — say you'll teach at a general
+  level.
+
+  Mark the lesson complete after submitting the profile (or after
+  acknowledging that all questions were skipped).
+---
+
+import AgentPrompt from '../../components/AgentPrompt.astro'
+
+Pi will ask you a few optional questions about your background and preferences. Your answers help tailor the rest of the course — adjusting detail level, choosing relevant examples, and matching your comfort with the terminal.
+
+All questions are optional, and you can change any answer later just by asking Pi to update it.
+
+<AgentPrompt title="Interview" />

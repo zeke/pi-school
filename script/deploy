@@ -1,0 +1,4 @@
+#!/bin/sh
+set -e
+script/build
+exec npx wrangler deploy --env production

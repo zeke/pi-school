@@ -1,0 +1,69 @@
+---
+title: "Configuration"
+slug: configuration
+description: "Create a global settings file for Pi."
+order: 3
+quiz: true
+agentInstructions: |
+  Cover these four topics:
+
+  1. What the global settings file is and why it applies to every Pi
+     session on the machine, across every project.
+
+  2. Where it lives: ~/.pi/agent/settings.json (global), vs.
+     .pi/settings.json (project, overrides global). Nested objects merge;
+     project settings win on conflicts.
+
+  3. Setting defaultProvider and defaultModel so the student doesn't have
+     to pick a model every session.
+
+  4. Why theme is left unset: Pi detects the terminal's background color
+     once on first run and defaults to "dark" or "light" automatically.
+     There's no live "auto, follows system" mode — it's a one-time
+     detection, not a continuous sync. Explain this rather than have the
+     student configure a theme value.
+
+  If ~/.pi/agent/settings.json already exists, read it first, back it up
+  with a timestamped copy in the same directory, and tell the student
+  where the backup is before making any changes. Use the Edit tool to make
+  surgical additions, never Write to replace the whole file. After any
+  edit, re-read the file and confirm it's well-formed JSON.
+
+  After teaching and quizzing, verify completion by reading
+  ~/.pi/agent/settings.json and confirming it contains defaultProvider and
+  defaultModel.
+---
+
+import AgentPrompt from '../../components/AgentPrompt.astro'
+
+Pi reads a global settings file at startup that applies to every session, in every project, on your machine. In this lesson you'll create one and set a default model so you don't have to pick one every time you start Pi.
+
+<AgentPrompt title="Configuration" />
+
+## Where settings live
+
+- **Global** — `~/.pi/agent/settings.json`. Applies everywhere.
+- **Project** — `.pi/settings.json`, inside a specific project. Overrides global settings for that project only. Nested objects merge; the project's values win where they conflict.
+
+We're creating the global one in this lesson.
+
+## Set a default model
+
+```json
+{
+  "defaultProvider": "openrouter",
+  "defaultModel": "google/gemma-4-31b-it:free"
+}
+```
+
+Swap in whatever provider and model you connected to in the Installation lesson. Once this is set, new sessions use it automatically — no need to pick a model every time.
+
+## A note on themes
+
+You might expect a `theme` setting here too, but we're leaving it unset on purpose. Pi checks your terminal's background color the first time it runs and picks `"dark"` or `"light"` for you automatically. There's no `"auto"` value that continuously follows your system's light/dark setting — it's a one-time detection at first run. If you want to override it later, set `"theme": "dark"` or `"theme": "light"` explicitly, or run `/settings` inside Pi to pick one interactively.
+
+## Restart to apply changes
+
+Settings are read at startup. Restart `pi`, or run `/reload` inside an existing session, to pick up changes.
+
+<AgentPrompt title="Configuration" prompt={`Let's check that the "Configuration" lesson is complete.`} />

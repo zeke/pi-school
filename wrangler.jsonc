@@ -1,0 +1,34 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "pi-school",
+  "compatibility_date": "2026-07-15",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "./dist"
+  },
+  // Public, non-secret values read by `astro.config.mjs` at build time and
+  // inlined into the prerendered HTML. Change SITE_URL when deploying to a
+  // different domain.
+  "vars": {
+    "SITE_URL": "https://pi-school.ziki.boo"
+  },
+  // KV namespace for production. You only need this if you're deploying to
+  // your own Cloudflare account. Local dev (`script/dev`) works fine without
+  // it.
+  "kv_namespaces": [
+    {
+      "binding": "PROGRESS",
+      "id": "1b59814976b94c2087d2cf0c272de99c"
+    }
+  ],
+  "env": {
+    "production": {
+      "routes": [
+        {
+          "pattern": "pi-school.ziki.boo",
+          "custom_domain": true
+        }
+      ]
+    }
+  }
+}

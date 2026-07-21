@@ -1,0 +1,112 @@
+---
+title: "Installation"
+slug: installation
+description: "Install Pi and get connected to a model."
+order: 1
+quiz: false
+agentInstructions: |
+  If the student is talking to you through Pi already, they've completed
+  most of this lesson. Confirm they have a supported OS (macOS, Windows, or
+  Linux), can run `pi` in a terminal, and have successfully authenticated
+  with a model (either via `/login` with ChatGPT Plus/Pro, or an API key
+  from a provider like OpenRouter). Confirm they've sent at least one
+  prompt and received a response.
+---
+
+import AgentPrompt from '../../components/AgentPrompt.astro'
+
+Pi is a terminal-based agent — there's no separate app to download. You'll install it from the command line, and you'll interact with it from the command line too. If you've never used a terminal before, that's okay: Pi will walk you through everything, and you'll pick up what you need as you go.
+
+## Quick system check
+
+<div id="system-check" class="my-8 rounded-2xl border border-gray-200 dark:border-stone-700/50 overflow-hidden not-prose">
+  <div class="px-6 py-4 bg-gray-50 dark:bg-stone-900/80 border-b border-gray-200 dark:border-stone-700/50">
+    <p class="text-sm font-mono uppercase tracking-[0.15em] text-gray-500 dark:text-stone-400">System Check</p>
+  </div>
+  <div class="divide-y divide-gray-100 dark:divide-stone-800">
+    <div class="flex items-center justify-between px-6 py-4" id="check-os">
+      <span class="text-base text-gray-600 dark:text-stone-300">Operating system</span>
+      <span class="check-value font-mono text-base">…</span>
+    </div>
+    <div class="flex items-center justify-between px-6 py-4" id="check-internet">
+      <span class="text-base text-gray-600 dark:text-stone-300">Internet</span>
+      <span class="check-value font-mono text-base">…</span>
+    </div>
+  </div>
+</div>
+
+## Install Pi
+
+<div id="install-section" class="not-prose">
+
+<div id="install-macos-linux" class="hidden">
+
+```bash
+curl -fsSL https://pi.dev/install.sh | sh
+```
+
+Or with npm, pnpm, or bun:
+
+```bash
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+```
+
+</div>
+
+<div id="install-windows" class="hidden">
+
+```powershell
+powershell -c "irm https://pi.dev/install.ps1 | iex"
+```
+
+Or with npm, pnpm, or bun:
+
+```bash
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+```
+
+</div>
+
+<div id="install-other" class="hidden">
+
+```bash
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+```
+
+</div>
+
+</div>
+
+You'll need [Node.js](https://nodejs.org) if you're installing via npm/pnpm/bun.
+
+## Watch a quick walkthrough
+
+<div class="my-8 not-prose">
+  <p class="text-sm text-gray-500 dark:text-stone-400">Terminal walkthrough coming soon.</p>
+</div>
+
+## Start Pi
+
+```bash
+cd /path/to/a/project
+pi
+```
+
+## Get connected to a model
+
+Pi doesn't ship with a free built-in model the way some tools do, so you'll need to connect one before your first prompt works. Follow this decision tree:
+
+1. **Already have ChatGPT Plus or Pro?** Run `/login` inside Pi and choose ChatGPT (Codex). This is officially sanctioned by OpenAI for third-party tools like Pi — safe to use.
+2. **No ChatGPT subscription?** Sign up for a free [OpenRouter](https://openrouter.ai) account, grab an API key, and use one of the models tagged `:free` (for example `google/gemma-4-31b-it:free`). Zero cost, no local compute required.
+
+**A note on other subscriptions.** Pi's `/login` also lists Claude Pro/Max and GitHub Copilot as options. We don't recommend either: Anthropic's own terms explicitly prohibit routing Claude subscription credentials through third-party tools, and GitHub's terms treat non-official Copilot clients as a violation too — both have real enforcement history (account bans/suspensions). Stick with ChatGPT Codex or an API key.
+
+## Send a test prompt
+
+```
+Hello, are you there?
+```
+
+If you get a response, you're connected and ready to go.
+
+<AgentPrompt title="Installation" />

@@ -1,0 +1,15 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --theme-solid: #f97316;
+}
+
+.theme-button {
+  background-color: var(--theme-solid);
+  color: white;
+}
+
+.theme-solid-bg {
+  background-color: var(--theme-solid);
+}

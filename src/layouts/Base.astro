@@ -1,0 +1,41 @@
+---
+// Copyright (c) 2026 Zeke Sikelianos
+// Licensed under the Apache 2.0 license found in the LICENSE file or at:
+//     https://opensource.org/licenses/Apache-2.0
+
+import "../styles/main.css";
+
+interface Props {
+	title: string;
+	description: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} | Pi School</title>
+    <meta name="description" content={description} />
+    <meta name="color-scheme" content="light dark" />
+  </head>
+  <body class="bg-white dark:bg-stone-950 text-gray-900 dark:text-stone-100 font-mono">
+    <header class="border-b border-gray-200 dark:border-stone-800">
+      <nav class="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
+        <a href="/" class="font-semibold">Pi School</a>
+        <a href="https://pi.dev" class="text-sm text-gray-500 dark:text-stone-400 hover:underline">pi.dev</a>
+      </nav>
+    </header>
+    <main class="max-w-3xl mx-auto px-6 py-10">
+      <slot />
+    </main>
+    <footer class="max-w-3xl mx-auto px-6 py-10 text-sm text-gray-500 dark:text-stone-400">
+      <a href="/glossary" class="hover:underline">Glossary</a>
+      ·
+      <a href="https://github.com/zeke/pi-school" class="hover:underline">GitHub</a>
+    </footer>
+  </body>
+</html>

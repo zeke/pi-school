@@ -1,0 +1,38 @@
+---
+// Copyright (c) 2026 Zeke Sikelianos
+// Licensed under the Apache 2.0 license found in the LICENSE file or at:
+//     https://opensource.org/licenses/Apache-2.0
+
+import { getCollection } from "astro:content";
+import Base from "../layouts/Base.astro";
+
+export const prerender = true;
+
+const lessons = (await getCollection("lessons"))
+	.filter((lesson) => !lesson.data.agentOnly)
+	.sort((a, b) => a.data.order - b.data.order);
+---
+
+<Base
+  title="Pi School"
+  description="A free, self-paced course for learning Pi, the minimal agent harness."
+>
+  <h1 class="text-2xl font-semibold mb-2">Pi School</h1>
+  <p class="text-gray-600 dark:text-stone-400 mb-8">
+    A free, self-paced course for learning <a href="https://pi.dev" class="underline">Pi</a>, the minimal agent harness.
+  </p>
+
+  <h2 class="text-sm font-mono uppercase tracking-wider text-gray-500 dark:text-stone-500 mb-4">
+    Lessons
+  </h2>
+  <ol class="divide-y divide-gray-200 dark:divide-stone-800">
+    {lessons.map((lesson) => (
+      <li class="py-3">
+        <a href={`/lessons/${lesson.data.slug}`} class="font-medium hover:underline">
+          {lesson.data.title}
+        </a>
+        <p class="text-sm text-gray-500 dark:text-stone-500 mt-0.5">{lesson.data.description}</p>
+      </li>
+    ))}
+  </ol>
+</Base>
