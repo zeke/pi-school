@@ -190,7 +190,7 @@ function writeTempWranglerConfig(kvNamespaceId) {
     name: workerName,
     compatibility_date: "2026-07-15",
     compatibility_flags: ["nodejs_compat"],
-    assets: { directory: resolvePath(process.cwd(), "dist") },
+    assets: { directory: resolvePath(process.cwd(), "dist", "client") },
     vars: { SITE_URL: environmentUrl },
     kv_namespaces: [{ binding: "PROGRESS", id: kvNamespaceId }],
   };
