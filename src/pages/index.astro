@@ -9,7 +9,6 @@ import Base from "../layouts/Base.astro";
 export const prerender = true;
 
 const lessons = (await getCollection("lessons"))
-	.filter((lesson) => !lesson.data.agentOnly)
 	.sort((a, b) => a.data.order - b.data.order);
 ---
 

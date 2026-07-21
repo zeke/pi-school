@@ -19,6 +19,9 @@
       "preset": "recommended",
       "correctness": {
         "noUnknownFunction": "off"
+      },
+      "complexity": {
+        "noImportantStyles": "off"
       }
     }
   },

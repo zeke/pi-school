@@ -23,7 +23,6 @@ const {
 const pageTitle = title ? `${title} | Pi School` : "Pi School";
 
 const lessons = (await getCollection("lessons"))
-	.filter((lesson) => !lesson.data.agentOnly)
 	.sort((a, b) => a.data.order - b.data.order);
 const currentPath = Astro.url.pathname;
 

@@ -77,10 +77,14 @@
     scroll-margin-top: 5rem;
   }
 
+  /* !important: Tailwind Typography's prose `a` styling (underline) is
+     emitted inside @layer utilities, which wins over @layer base for
+     non-important declarations regardless of selector specificity.
+     Without !important these links would render underlined. */
   .prose .heading-anchor,
   .prose .heading-anchor:hover {
-    text-decoration: none;
-    color: inherit;
+    text-decoration: none !important;
+    color: inherit !important;
   }
 
   .prose .heading-anchor::after {
@@ -96,21 +100,26 @@
   }
 }
 
-/* Theme-framed code blocks, matching OpenCode School's treatment. */
+/* Theme-framed code blocks, matching OpenCode School's treatment.
+   !important overrides Shiki's inline background/color on <pre>, and
+   these rules live outside @layer base on purpose: Tailwind Typography's
+   prose pre/code styles are emitted inside @layer utilities, which wins
+   against layered rules regardless of specificity. Unlayered declarations
+   beat layered ones in the cascade. */
 .prose pre.astro-code {
   border: 2px solid var(--theme-solid);
-  background: color-mix(in srgb, var(--theme-soft-bg) 40%, white);
-  color: theme(--color-stone-800);
+  background: color-mix(in srgb, var(--theme-soft-bg) 40%, white) !important;
+  color: theme(--color-stone-800) !important;
 }
 
 .prose pre.astro-code span {
-  color: inherit;
+  color: inherit !important;
 }
 
 .dark .prose pre.astro-code {
   border: 2px solid color-mix(in srgb, var(--theme-link-dark) 60%, transparent);
-  background: theme(--color-stone-900);
-  color: theme(--color-stone-300);
+  background: theme(--color-stone-900) !important;
+  color: theme(--color-stone-300) !important;
 }
 
 .dark .prose :not(pre) > code {
@@ -228,9 +237,11 @@
   background: var(--theme-soft-bg-dark);
 }
 
+/* !important: overrides the default border/background utilities applied
+   alongside this class on the same element. */
 .lesson-status--complete {
-  border-color: var(--theme-solid);
-  background: var(--theme-solid);
+  border-color: var(--theme-solid) !important;
+  background: var(--theme-solid) !important;
 }
 
 .agent-prompt-box {
