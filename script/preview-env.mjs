@@ -56,8 +56,15 @@ async function deploy() {
     const kvNamespaceId = await findOrCreateKvNamespace(previewKvTitle);
     await seedKvNamespace(kvNamespaceId);
 
-    const configPath = writeTempWranglerConfig(kvNamespaceId);
-    await wrangler(["deploy", "--config", configPath]);
+    // Build against a per-PR wrangler config so @astrojs/cloudflare bakes
+    // the preview Worker name, KV namespace, and SITE_URL into the
+    // generated dist/server/wrangler.json (which is what actually carries
+    // the resolved `main` entrypoint and assets path Wrangler needs).
+    const inputConfigPath = writeTempWranglerConfig(kvNamespaceId);
+    await run("npx", ["astro", "build"], {
+      env: { ...process.env, WRANGLER_CONFIG_PATH: inputConfigPath },
+    });
+    await wrangler(["deploy", "--config", "dist/server/wrangler.json"]);
 
     if (!(await isCurrentPullRequestHead())) {
       await createDeploymentStatus(
@@ -88,12 +95,16 @@ async function deploy() {
 }
 
 async function destroy() {
+  // @astrojs/cloudflare auto-provisions a `<worker>-session` KV namespace
+  // on first deploy (Astro's session feature) even though we don't use it.
+  // Clean it up alongside our own preview namespace.
   const results = await Promise.allSettled([
     wrangler(["delete", "--name", workerName], {
       allowFailure: true,
       input: "y\n",
     }),
     deleteKvNamespaceIfExists(previewKvTitle),
+    deleteKvNamespaceIfExists(`${workerName}-session`),
     markDeploymentsInactive(),
   ]);
 
@@ -284,7 +295,7 @@ async function wrangler(args, options = {}) {
 async function run(command, args, options = {}) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, {
-      env: process.env,
+      env: options.env ?? process.env,
       stdio: [options.input ? "pipe" : "ignore", "pipe", "pipe"],
     });
     let stdout = "";

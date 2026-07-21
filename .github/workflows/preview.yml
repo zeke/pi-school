@@ -36,8 +36,6 @@ jobs:
 
       - run: npm ci
 
-      - run: npx wrangler types && npx astro build
-
       - run: node script/preview-env.mjs deploy
         env:
           PREVIEW_PR_NUMBER: ${{ github.event.pull_request.number }}
