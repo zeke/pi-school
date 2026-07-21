@@ -13,6 +13,7 @@
 
 import { spawn } from "node:child_process";
 import { writeFileSync } from "node:fs";
+import { resolve as resolvePath } from "node:path";
 
 const appName = "pi-school";
 const workersSubdomain = "ziki";
@@ -189,7 +190,7 @@ function writeTempWranglerConfig(kvNamespaceId) {
     name: workerName,
     compatibility_date: "2026-07-15",
     compatibility_flags: ["nodejs_compat"],
-    assets: { directory: "./dist" },
+    assets: { directory: resolvePath(process.cwd(), "dist") },
     vars: { SITE_URL: environmentUrl },
     kv_namespaces: [{ binding: "PROGRESS", id: kvNamespaceId }],
   };
