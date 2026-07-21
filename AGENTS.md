@@ -94,6 +94,34 @@ lesson's `agentInstructions` for storing interview answers — needs a KV
 schema and route before that lesson actually works end to end),
 `/llms.txt`, `/api/openapi.json`.
 
+## Custom domain
+
+`wrangler deploy` does not attach the custom domain automatically even
+though `wrangler.jsonc` declares it under `env.production.routes` — it
+needs an explicit non-interactive confirmation that gets skipped in CI.
+The custom domain was attached once, manually, via the Workers domains API:
+
+```bash
+curl -X PUT "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/domains" \
+  -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "environment": "production",
+    "hostname": "pi-school.ziki.boo",
+    "service": "pi-school",
+    "zone_id": "c7d532041443d0c4a26680cfa1657e36"
+  }'
+```
+
+This only needs to happen once per Worker; it persists across future
+deploys. Live at both `https://pi-school.ziki.boo` and
+`https://pi-school.ziki.workers.dev`.
+
+**Note:** Cloudflare's bot protection returns `error code: 1042` for
+requests with no/generic User-Agent (e.g. bare `curl`) on the
+`workers.dev` subdomain. Not a bug — pass a browser-like `-A` header when
+smoke-testing with curl.
+
 ## Preview deployments
 
 `.github/workflows/preview.yml` deploys a per-PR Worker
