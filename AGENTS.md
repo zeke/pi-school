@@ -60,6 +60,33 @@ Always run `script/lint` and `script/test` before committing.
 - `compatibility_date` in `wrangler.jsonc` is capped by whatever workerd
   binary version is installed (currently `2026-07-15`); a newer date than
   the installed binary supports fails to start rather than warning.
+- `assets.directory` in `wrangler.jsonc` must point at `./dist/client`,
+  not `./dist` — Astro's Cloudflare adapter puts the server bundle in
+  `dist/server/` and static assets in `dist/client/`.
+- `@astrojs/cloudflare` generates `dist/server/wrangler.json` at build
+  time — a fully resolved deploy config with `main` and `assets.directory`
+  baked in. This is the actual file `wrangler deploy` needs when deploying
+  from a directory other than the project root (e.g. previews); a
+  hand-rolled config without a resolved `main` will build and "deploy"
+  successfully but silently serve 404s for every request, since Cloudflare's
+  assets binding intercepts requests before they'd reach a Worker script
+  that was never wired up. Point `astro.config.mjs`'s `cloudflare({
+  configPath })` at whatever wrangler config you want resolved (see
+  `WRANGLER_CONFIG_PATH` support in `astro.config.mjs`), then deploy
+  `dist/server/wrangler.json` directly.
+- `@astrojs/cloudflare` auto-provisions a `<worker-name>-session` KV
+  namespace on first deploy (Astro's built-in session feature, which we
+  don't use) even though it's not declared anywhere in our config. Preview
+  teardown deletes it explicitly by name since Wrangler won't clean it up
+  on its own.
+- **Always merge preview/fix work into `main` before closing the PR that
+  introduced it.** `destroy-preview` in `preview.yml` checks out
+  `default_branch`, not the PR branch — if a fix only exists on the PR
+  branch, teardown runs the stale version from `main` and can leak
+  resources. Learned this the hard way while building the preview
+  workflow itself: closed a smoke-test PR before merging its fix commits,
+  and teardown missed the `-session` namespace cleanup that only existed
+  on the unmerged branch.
 
 ## Content authoring
 
