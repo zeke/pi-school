@@ -4,7 +4,7 @@
   "compatibility_date": "2026-07-15",
   "compatibility_flags": ["nodejs_compat"],
   "assets": {
-    "directory": "./dist"
+    "directory": "./dist/client"
   },
   // Public, non-secret values read by `astro.config.mjs` at build time and
   // inlined into the prerendered HTML. Change SITE_URL when deploying to a
