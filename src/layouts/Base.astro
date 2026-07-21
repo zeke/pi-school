@@ -3,14 +3,38 @@
 // Licensed under the Apache 2.0 license found in the LICENSE file or at:
 //     https://opensource.org/licenses/Apache-2.0
 
+import "@fontsource/inter/400.css";
+import "@fontsource/inter/500.css";
+import "@fontsource/inter/600.css";
+import "@fontsource/jetbrains-mono/400.css";
+import "@fontsource/jetbrains-mono/500.css";
 import "../styles/main.css";
+import { getCollection } from "astro:content";
 
 interface Props {
-	title: string;
-	description: string;
+	title?: string;
+	description?: string;
 }
 
-const { title, description } = Astro.props;
+const {
+	title,
+	description = "Learn to use Pi, the minimal agent harness.",
+} = Astro.props;
+const pageTitle = title ? `${title} | Pi School` : "Pi School";
+
+const lessons = (await getCollection("lessons"))
+	.filter((lesson) => !lesson.data.agentOnly)
+	.sort((a, b) => a.data.order - b.data.order);
+const currentPath = Astro.url.pathname;
+
+const secondaryLinks = [
+	{ href: "/about", label: "About" },
+	{ href: "/tips", label: "Tips" },
+	{ href: "/cheatsheet", label: "Cheatsheet" },
+	{ href: "/glossary", label: "Glossary" },
+	{ href: "/contributing", label: "Contributing" },
+	{ href: "/troubleshooting", label: "Troubleshooting" },
+];
 ---
 
 <!doctype html>
@@ -18,24 +42,136 @@ const { title, description } = Astro.props;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title} | Pi School</title>
     <meta name="description" content={description} />
     <meta name="color-scheme" content="light dark" />
+    <title>{pageTitle}</title>
+    <script is:inline>
+      if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        document.documentElement.classList.add("dark");
+      }
+      window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
+        document.documentElement.classList.toggle("dark", e.matches);
+      });
+    </script>
   </head>
-  <body class="bg-white dark:bg-stone-950 text-gray-900 dark:text-stone-100 font-mono">
-    <header class="border-b border-gray-200 dark:border-stone-800">
-      <nav class="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
-        <a href="/" class="font-semibold">Pi School</a>
-        <a href="https://pi.dev" class="text-sm text-gray-500 dark:text-stone-400 hover:underline">pi.dev</a>
+  <body class="min-h-screen">
+    <div class="hidden lg:flex fixed top-5 right-5 z-40 items-center gap-3">
+      <a
+        href="https://github.com/zeke/pi-school"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-gray-400 hover:text-gray-600 dark:text-stone-600 dark:hover:text-stone-400 transition-colors"
+        aria-label="Open source on GitHub"
+      >
+        <svg class="w-7 h-7" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.342-3.369-1.342-.454-1.154-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836a9.59 9.59 0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"></path>
+        </svg>
+      </a>
+    </div>
+
+    <div class="lg:flex">
+      <header class="lg:hidden flex items-center justify-between p-4 border-b border-gray-200 dark:border-stone-800">
+        <a href="/" class="font-mono font-bold text-lg">Pi School</a>
+        <button id="menu-toggle" class="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-stone-800" aria-label="Toggle navigation">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </header>
+
+      <nav id="sidebar" class="hidden lg:block w-72 shrink-0 border-r border-gray-200 dark:border-stone-800 h-screen sticky top-0 overflow-y-auto p-6">
+        <a href="/" class="block font-mono font-bold text-xl mb-6 px-3">Pi School</a>
+        <ol class="space-y-1">
+          {lessons.map((lesson) => {
+            const href = `/lessons/${lesson.data.slug}`;
+            const isActive = currentPath === href || currentPath === `${href}/`;
+            return (
+              <li>
+                <a
+                  href={href}
+                  class:list={[
+                    "flex items-center justify-between px-3 py-1.5 rounded-md text-sm transition-colors",
+                    isActive
+                      ? "theme-active-nav font-medium"
+                      : "text-gray-600 hover:text-gray-900 hover:bg-gray-50 dark:text-stone-400 dark:hover:text-stone-200 dark:hover:bg-stone-800",
+                  ]}
+                >
+                  <span>
+                    <span class="text-gray-400 dark:text-stone-600 mr-1.5">{String(lesson.data.order).padStart(2, "0")}.</span>
+                    {lesson.data.title}
+                  </span>
+                </a>
+              </li>
+            );
+          })}
+        </ol>
+        <div class="mt-6 pt-4 border-t border-gray-200 dark:border-stone-800">
+          {secondaryLinks.map((link) => {
+            const isActive = currentPath === link.href || currentPath === `${link.href}/`;
+            return (
+              <a
+                href={link.href}
+                class:list={[
+                  "block px-3 py-1.5 rounded-md text-sm transition-colors",
+                  isActive
+                    ? "theme-active-nav font-medium"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50 dark:text-stone-400 dark:hover:text-stone-200 dark:hover:bg-stone-800",
+                ]}
+              >
+                {link.label}
+              </a>
+            );
+          })}
+        </div>
+        <div class="mt-6 pt-4 border-t border-gray-200 dark:border-stone-800 flex items-center gap-5 px-3">
+          <div class="relative group">
+            <a href="https://pi.dev" target="_blank" rel="noopener noreferrer" class="block text-gray-400 dark:text-stone-600 hover:text-gray-600 dark:hover:text-stone-400 transition-colors" aria-label="Built with Pi">
+              <svg class="w-5 h-5" viewBox="0 0 800 800" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path fill-rule="evenodd" d="M165.29 165.29H517.36V400H400V517.36H282.65V634.72H165.29ZM282.65 282.65V400H400V282.65Z" />
+                <path d="M517.36 400H634.72V634.72H517.36Z" />
+              </svg>
+            </a>
+            <span class="pointer-events-none absolute bottom-full left-0 mb-2 whitespace-nowrap rounded px-2 py-1 text-xs bg-gray-800 dark:bg-stone-700 text-white opacity-0 group-hover:opacity-100 transition-opacity">Built with Pi</span>
+          </div>
+          <div class="relative group">
+            <a href="https://github.com/zeke/pi-school" target="_blank" rel="noopener noreferrer" class="block text-gray-400 dark:text-stone-600 hover:text-gray-600 dark:hover:text-stone-400 transition-colors" aria-label="Open source on GitHub">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.342-3.369-1.342-.454-1.154-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836a9.59 9.59 0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"></path>
+              </svg>
+            </a>
+            <span class="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 whitespace-nowrap rounded px-2 py-1 text-xs bg-gray-800 dark:bg-stone-700 text-white opacity-0 group-hover:opacity-100 transition-opacity">Open source on GitHub</span>
+          </div>
+          <div class="relative group">
+            <a href="https://discord.com/invite/nKXTsAcmbT" target="_blank" rel="noopener noreferrer" class="block text-gray-400 dark:text-stone-600 hover:text-gray-600 dark:hover:text-stone-400 transition-colors" aria-label="Pi support community on Discord">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"></path>
+              </svg>
+            </a>
+            <span class="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 whitespace-nowrap rounded px-2 py-1 text-xs bg-gray-800 dark:bg-stone-700 text-white opacity-0 group-hover:opacity-100 transition-opacity">Pi support community</span>
+          </div>
+        </div>
       </nav>
-    </header>
-    <main class="max-w-3xl mx-auto px-6 py-10">
-      <slot />
-    </main>
-    <footer class="max-w-3xl mx-auto px-6 py-10 text-sm text-gray-500 dark:text-stone-400">
-      <a href="/glossary" class="hover:underline">Glossary</a>
-      ·
-      <a href="https://github.com/zeke/pi-school" class="hover:underline">GitHub</a>
-    </footer>
+
+      <main class="flex-1 min-w-0 p-6 lg:p-12 max-w-3xl">
+        <slot />
+      </main>
+    </div>
+
+    <script is:inline>
+      const toggle = document.getElementById("menu-toggle");
+      const sidebar = document.getElementById("sidebar");
+      if (toggle && sidebar) {
+        toggle.addEventListener("click", () => {
+          sidebar.classList.toggle("hidden");
+          if (!sidebar.classList.contains("hidden")) {
+            sidebar.classList.add("fixed", "inset-0", "z-50", "bg-white", "dark:bg-stone-900");
+            sidebar.classList.remove("lg:block");
+          } else {
+            sidebar.classList.remove("fixed", "inset-0", "z-50", "bg-white", "dark:bg-stone-900");
+            sidebar.classList.add("lg:block");
+          }
+        });
+      }
+    </script>
   </body>
 </html>

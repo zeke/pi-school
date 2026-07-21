@@ -10,6 +10,8 @@ import mdx from "@astrojs/mdx";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
 import { parse as parseJsonc } from "jsonc-parser";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
+import rehypeSlug from "rehype-slug";
 
 // Read public, non-secret values from wrangler.jsonc so the deployment config
 // is the single source of truth. These get inlined into the build, which is
@@ -33,6 +35,13 @@ export default defineConfig({
   adapter: cloudflare({ configPath: wranglerConfigPath }),
   integrations: [mdx()],
   markdown: {
+    rehypePlugins: [
+      rehypeSlug,
+      [
+        rehypeAutolinkHeadings,
+        { behavior: "wrap", properties: { class: "heading-anchor" } },
+      ],
+    ],
     shikiConfig: {
       theme: "vesper",
     },

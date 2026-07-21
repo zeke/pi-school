@@ -1,15 +1,262 @@
+/* Copyright (c) 2026 Zeke Sikelianos
+   Licensed under the Apache 2.0 license found in the LICENSE file or at:
+       https://opensource.org/licenses/Apache-2.0 */
+
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
-  --theme-solid: #f97316;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono:
+    "JetBrains Mono", ui-monospace, "Cascadia Code", "Fira Code", Menlo, Monaco,
+    Consolas, monospace;
+}
+
+/*
+  Single accent color for now. OpenCode School lets each enrolled student
+  pick their own accent (see window.__schoolThemePalettes in its Base.astro)
+  tied to its enrollment flow. We haven't built enrollment yet, so this is
+  fixed to the same default ("blue") OpenCode School ships before a student
+  picks their own — swap to the full per-student picker when enrollment
+  lands.
+*/
+:root {
+  --theme-solid: #2563eb;
+  --theme-solid-hover: #1d4ed8;
+  --theme-link: #2563eb;
+  --theme-link-dark: #60a5fa;
+  --theme-soft-bg: #eff6ff;
+  --theme-soft-border: #bfdbfe;
+  --theme-soft-text: #1d4ed8;
+  --theme-soft-bg-dark: rgba(37, 99, 235, 0.18);
+  --theme-soft-border-dark: rgba(96, 165, 250, 0.35);
+  --theme-soft-text-dark: #93c5fd;
+  --theme-card-text: #dbeafe;
+}
+
+/*
+  Light/dark mode via OS preference. A tiny inline script in Base.astro
+  adds .dark to <html> so Tailwind's dark variant works without a
+  client-side toggle.
+*/
+
+@layer base {
+  body {
+    @apply bg-white text-gray-900 dark:bg-stone-900 dark:text-stone-400;
+  }
+
+  .prose {
+    --tw-prose-body: theme(--color-gray-700);
+    --tw-prose-headings: theme(--color-gray-900);
+    --tw-prose-links: var(--theme-link);
+    --tw-prose-code: theme(--color-gray-800);
+    --tw-prose-pre-bg: theme(--color-gray-50);
+    --tw-prose-pre-code: theme(--color-gray-800);
+  }
+
+  .dark .prose {
+    --tw-prose-body: theme(--color-stone-400);
+    --tw-prose-headings: theme(--color-stone-300);
+    --tw-prose-links: var(--theme-link-dark);
+    --tw-prose-code: theme(--color-stone-300);
+    --tw-prose-pre-bg: theme(--color-stone-800);
+    --tw-prose-pre-code: theme(--color-stone-300);
+    --tw-prose-bold: theme(--color-stone-300);
+    --tw-prose-counters: theme(--color-stone-400);
+    --tw-prose-bullets: theme(--color-stone-500);
+    --tw-prose-hr: theme(--color-stone-700);
+    --tw-prose-quotes: theme(--color-stone-300);
+    --tw-prose-quote-borders: theme(--color-stone-600);
+    --tw-prose-th-borders: theme(--color-stone-600);
+    --tw-prose-td-borders: theme(--color-stone-700);
+  }
+
+  .prose :is(h2, h3, h4, h5, h6) {
+    scroll-margin-top: 5rem;
+  }
+
+  .prose .heading-anchor,
+  .prose .heading-anchor:hover {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .prose .heading-anchor::after {
+    content: "#";
+    margin-left: 0.35em;
+    font-size: 0.65em;
+    color: var(--tw-prose-links);
+    visibility: hidden;
+  }
+
+  .prose :is(h2, h3, h4, h5, h6):hover .heading-anchor::after {
+    visibility: visible;
+  }
+}
+
+/* Theme-framed code blocks, matching OpenCode School's treatment. */
+.prose pre.astro-code {
+  border: 2px solid var(--theme-solid);
+  background: color-mix(in srgb, var(--theme-soft-bg) 40%, white);
+  color: theme(--color-stone-800);
+}
+
+.prose pre.astro-code span {
+  color: inherit;
+}
+
+.dark .prose pre.astro-code {
+  border: 2px solid color-mix(in srgb, var(--theme-link-dark) 60%, transparent);
+  background: theme(--color-stone-900);
+  color: theme(--color-stone-300);
+}
+
+.dark .prose :not(pre) > code {
+  background-color: theme(--color-stone-800);
+  color: theme(--color-stone-300);
+}
+
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid theme(--color-gray-200);
+  border-top-color: var(--theme-solid);
+  border-radius: 50%;
+  animation: spin-slow 0.6s linear infinite;
+}
+
+.dark .spinner {
+  border-color: theme(--color-stone-700);
+  border-top-color: var(--theme-link-dark);
+}
+
+.theme-link {
+  color: var(--theme-link);
+  transition: color 150ms ease;
+}
+
+.theme-link:hover {
+  color: var(--theme-solid-hover);
+}
+
+.dark .theme-link {
+  color: var(--theme-link-dark);
+}
+
+.dark .theme-link:hover {
+  color: var(--theme-soft-text-dark);
 }
 
 .theme-button {
-  background-color: var(--theme-solid);
+  background: var(--theme-solid);
   color: white;
+  transition: background-color 150ms ease;
+}
+
+.theme-button:hover {
+  background: var(--theme-solid-hover);
+}
+
+.theme-panel {
+  border: 1px solid var(--theme-soft-border);
+  background: color-mix(in srgb, var(--theme-soft-bg) 88%, white);
+}
+
+.dark .theme-panel {
+  border-color: var(--theme-soft-border-dark);
+  background: var(--theme-soft-bg-dark);
+}
+
+.theme-kicker {
+  color: var(--theme-soft-text);
+}
+
+.dark .theme-kicker {
+  color: var(--theme-soft-text-dark);
+}
+
+.theme-banner {
+  background: var(--theme-soft-bg);
+  color: var(--theme-soft-text);
+}
+
+.dark .theme-banner {
+  background: var(--theme-soft-bg-dark);
+  color: var(--theme-soft-text-dark);
+}
+
+.theme-active-nav {
+  background: var(--theme-soft-bg);
+  color: var(--theme-soft-text);
+}
+
+.dark .theme-active-nav {
+  background: var(--theme-soft-bg-dark);
+  color: var(--theme-soft-text-dark);
 }
 
 .theme-solid-bg {
-  background-color: var(--theme-solid);
+  background: var(--theme-solid);
+}
+
+.lesson-link:hover .lesson-title {
+  color: var(--theme-link);
+}
+
+.dark .lesson-link:hover .lesson-title {
+  color: var(--theme-link-dark);
+}
+
+.lesson-row--next {
+  border: 1px solid var(--theme-soft-border);
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--theme-soft-bg) 92%, white);
+  padding-inline: 1rem;
+}
+
+.dark .lesson-row--next {
+  border-color: var(--theme-soft-border-dark);
+  background: var(--theme-soft-bg-dark);
+}
+
+.lesson-status--complete {
+  border-color: var(--theme-solid);
+  background: var(--theme-solid);
+}
+
+.agent-prompt-box {
+  border: 2px solid var(--theme-solid);
+  border-left: 6px solid var(--theme-solid);
+  background: color-mix(in srgb, var(--theme-soft-bg) 40%, white);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--theme-solid) 12%, transparent),
+    0 4px 16px color-mix(in srgb, var(--theme-solid) 15%, transparent);
+}
+
+.agent-prompt-box pre {
+  background: color-mix(in srgb, var(--theme-soft-bg) 25%, white);
+  color: theme(--color-gray-800);
+}
+
+.dark .agent-prompt-box {
+  border: 2px solid color-mix(in srgb, var(--theme-link-dark) 60%, transparent);
+  border-left: 6px solid var(--theme-link-dark);
+  background: theme(--color-stone-950);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--theme-link-dark) 18%, transparent),
+    0 4px 20px color-mix(in srgb, var(--theme-link-dark) 20%, transparent);
+}
+
+.dark .agent-prompt-box pre {
+  background: theme(--color-stone-950);
+  color: theme(--color-stone-300);
 }

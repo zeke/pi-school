@@ -88,6 +88,38 @@ Always run `script/lint` and `script/test` before committing.
   and teardown missed the `-session` namespace cleanup that only existed
   on the unmerged branch.
 
+## Design and layout
+
+Ported from opencode.school's visual and structural design: Inter (body) +
+JetBrains Mono (headings/code) via `@fontsource`, Tailwind's `stone` palette
+for dark mode (not `gray`), a sidebar-based layout with the lesson list and
+secondary page links, and a CSS custom-property theme system
+(`--theme-solid`, `--theme-link`, etc. in `src/styles/main.css`).
+
+Deliberately **not** ported yet:
+
+- **Per-student color picker.** OpenCode School lets each enrolled student
+  pick an accent color from a palette, applied via `window.__schoolThemePalettes`
+  and CSS custom properties set at runtime. We use a single fixed "blue"
+  theme (the same default OpenCode School shows before a student picks) since
+  we haven't built enrollment yet. When enrollment lands, revisit whether to
+  port the full picker.
+- **Client-side progress JS** (`window.school` in OpenCode School's
+  Base.astro) — checkmarks, cached progress, `?sid=` handling. Ties to
+  enrollment, not yet built here.
+- **Cloudflare AI Search widget** and **Umami analytics** — explicitly out of
+  scope for pi-school (decided early in planning).
+- **Exercises section in the sidebar** — no exercises collection exists yet.
+
+`src/pages/{about,tips,cheatsheet,glossary,troubleshooting,contributing,disenroll}.astro`
+are placeholder stubs ("Coming soon.") so the sidebar doesn't link to 404s.
+Replace with real content per lesson-plan.md's exercises/pages pass.
+
+Biome's CSS linter doesn't know Tailwind v4's `theme()` function — same fix
+opencode.school uses: `correctness.noUnknownFunction: "off"` in `biome.json`
+(scoped to CSS only in practice, since it's the only place that function
+appears).
+
 ## Content authoring
 
 Each lesson is an MDX file in `src/content/lessons/`. Schema (in

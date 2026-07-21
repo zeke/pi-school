@@ -23,18 +23,34 @@ const allLessons = (await getCollection("lessons")).sort(
 	(a, b) => a.data.order - b.data.order,
 );
 const currentIndex = allLessons.findIndex((l) => l.data.slug === lesson.data.slug);
-const prev = allLessons[currentIndex - 1];
-const next = allLessons[currentIndex + 1];
+const next = currentIndex < allLessons.length - 1 ? allLessons[currentIndex + 1] : null;
 ---
 
 <Base title={lesson.data.title} description={lesson.data.description}>
+  <div class="mb-6">
+    <a href="/" class="text-sm text-gray-500 dark:text-stone-500 hover:text-gray-700 dark:hover:text-stone-300 transition-colors">
+      &larr; All lessons
+    </a>
+  </div>
+
+  <header class="mb-8">
+    <p class="text-sm font-mono text-gray-400 dark:text-stone-600 mb-1">Lesson {lesson.data.order}</p>
+    <h1 class="text-3xl font-bold">{lesson.data.title}</h1>
+    <p class="text-gray-600 dark:text-stone-400 mt-2">{lesson.data.description}</p>
+  </header>
+
   <article class="prose dark:prose-invert prose-stone max-w-none">
-    <h1>{lesson.data.title}</h1>
     <Content />
   </article>
 
-  <nav class="mt-12 flex items-center justify-between text-sm border-t border-gray-200 dark:border-stone-800 pt-6">
-    {prev ? <a href={`/lessons/${prev.data.slug}`}>&larr; {prev.data.title}</a> : <span />}
-    {next ? <a href={`/lessons/${next.data.slug}`}>{next.data.title} &rarr;</a> : <span />}
-  </nav>
+  {next && (
+    <div class="mt-10 pt-6 border-t border-gray-200 dark:border-stone-800">
+      <a
+        href={`/lessons/${next.data.slug}`}
+        class="theme-button flex w-full justify-center items-center gap-2 rounded-lg px-6 py-4 text-sm font-medium select-none"
+      >
+        Next lesson: {next.data.title} &rarr;
+      </a>
+    </div>
+  )}
 </Base>

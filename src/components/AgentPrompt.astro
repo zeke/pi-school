@@ -17,8 +17,8 @@ const defaultPrompt = `Let's work on the "${title}" lesson from Pi School.`;
 const text = prompt ?? defaultPrompt;
 ---
 
-<div class="agent-prompt not-prose my-6 rounded-xl border border-gray-200 dark:border-stone-700/50 overflow-hidden">
-  <div class="flex items-center justify-between px-4 py-2 bg-gray-50 dark:bg-stone-900/80 border-b border-gray-200 dark:border-stone-700/50">
+<div class="agent-prompt agent-prompt-box not-prose my-6 rounded-xl overflow-hidden">
+  <div class="flex items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-stone-700/50">
     <span class="text-xs font-mono uppercase tracking-wider text-gray-500 dark:text-stone-400">Prompt for Pi</span>
     <button type="button" class="agent-prompt-copy px-2.5 py-1 text-xs font-mono font-medium rounded transition-colors cursor-pointer theme-button">Copy</button>
   </div>

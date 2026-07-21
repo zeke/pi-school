@@ -14,24 +14,29 @@ const lessons = (await getCollection("lessons"))
 ---
 
 <Base
-  title="Pi School"
+  title={undefined}
   description="A free, self-paced course for learning Pi, the minimal agent harness."
 >
   <h1 class="text-2xl font-semibold mb-2">Pi School</h1>
   <p class="text-gray-600 dark:text-stone-400 mb-8">
-    A free, self-paced course for learning <a href="https://pi.dev" class="underline">Pi</a>, the minimal agent harness.
+    A free, self-paced course for learning <a href="https://pi.dev" class="theme-link underline">Pi</a>, the minimal agent harness.
   </p>
 
-  <h2 class="text-sm font-mono uppercase tracking-wider text-gray-500 dark:text-stone-500 mb-4">
+  <h2 class="text-xs font-mono uppercase tracking-wider text-gray-500 dark:text-stone-500 mb-4">
     Lessons
   </h2>
   <ol class="divide-y divide-gray-200 dark:divide-stone-800">
     {lessons.map((lesson) => (
       <li class="py-3">
-        <a href={`/lessons/${lesson.data.slug}`} class="font-medium hover:underline">
-          {lesson.data.title}
+        <a href={`/lessons/${lesson.data.slug}`} class="lesson-link group flex min-w-0 items-center gap-3">
+          <span class="text-gray-400 dark:text-stone-600 font-mono text-sm shrink-0">
+            {String(lesson.data.order).padStart(2, "0")}
+          </span>
+          <span class="min-w-0">
+            <span class="lesson-title font-medium transition-colors block">{lesson.data.title}</span>
+            <span class="text-sm text-gray-500 dark:text-stone-500">{lesson.data.description}</span>
+          </span>
         </a>
-        <p class="text-sm text-gray-500 dark:text-stone-500 mt-0.5">{lesson.data.description}</p>
       </li>
     ))}
   </ol>
