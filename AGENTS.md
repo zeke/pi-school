@@ -143,3 +143,5 @@ Scripts Edit + Workers KV Storage Edit permissions).
 Revise this AGENTS.md whenever the stack, scripts, schema, or API surface
 change. Keep `plan.md` as the historical planning record — don't merge new
 technical details into it once the codebase exists; put those here instead.
+
+<!-- ci/preview workflow smoke test -->
