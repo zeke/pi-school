@@ -15,17 +15,22 @@ import { parse as parseJsonc } from "jsonc-parser";
 // is the single source of truth. These get inlined into the build, which is
 // needed because human-facing pages are prerendered — runtime `env` bindings
 // aren't available when the HTML is generated.
+//
+// WRANGLER_CONFIG_PATH lets preview deploys build against a per-PR config
+// (different Worker name, different KV namespace) without touching the
+// checked-in wrangler.jsonc. See script/preview-env.mjs.
 const projectRoot = dirname(fileURLToPath(import.meta.url));
-const wranglerConfig = parseJsonc(
-  readFileSync(resolve(projectRoot, "wrangler.jsonc"), "utf-8"),
-);
+const wranglerConfigPath = process.env.WRANGLER_CONFIG_PATH
+  ? resolve(projectRoot, process.env.WRANGLER_CONFIG_PATH)
+  : resolve(projectRoot, "wrangler.jsonc");
+const wranglerConfig = parseJsonc(readFileSync(wranglerConfigPath, "utf-8"));
 const wranglerVars = wranglerConfig?.vars ?? {};
 const siteUrl = wranglerVars.SITE_URL || "https://pi-school.ziki.boo";
 
 export default defineConfig({
   site: siteUrl,
   output: "server",
-  adapter: cloudflare(),
+  adapter: cloudflare({ configPath: wranglerConfigPath }),
   integrations: [mdx()],
   markdown: {
     shikiConfig: {
