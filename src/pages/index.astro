@@ -27,6 +27,17 @@ const exercises = (await getCollection("exercises")).sort((a, b) => a.data.order
 
   <!-- Page header: hidden once enrolled -->
   <div id="page-header" class="mb-8">
+    <div class="mb-6 overflow-hidden rounded-2xl" style="aspect-ratio:16/9;">
+      <video
+        class="h-full w-full"
+        controls
+        preload="metadata"
+        poster="/video/intro-poster.jpg"
+      >
+        <source src="/video/intro.mp4" type="video/mp4" />
+      </video>
+    </div>
+
     <p class="text-xl text-gray-700 dark:text-gray-300 leading-relaxed">
       Pi School is a free, self-paced course for learning <a href="https://pi.dev" class="theme-link underline">Pi</a>, the minimal agent harness.
     </p>

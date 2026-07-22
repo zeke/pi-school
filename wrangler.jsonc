@@ -21,6 +21,15 @@
       "id": "1b59814976b94c2087d2cf0c272de99c"
     }
   ],
+  // R2 bucket holding the homepage intro video and any other large static
+  // assets we don't want baked into the Worker's static-assets bundle
+  // (which has a 25 MiB per-file limit).
+  "r2_buckets": [
+    {
+      "binding": "VIDEOS",
+      "bucket_name": "pi-school-assets"
+    }
+  ],
   "env": {
     "production": {
       "routes": [
