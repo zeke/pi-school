@@ -88,37 +88,86 @@ Always run `script/lint` and `script/test` before committing.
   and teardown missed the `-session` namespace cleanup that only existed
   on the unmerged branch.
 
-## Design and layout
+## Design and functionality: a faithful clone of opencode.school
 
-Ported from opencode.school's visual and structural design: Inter (body) +
-JetBrains Mono (headings/code) via `@fontsource`, Tailwind's `stone` palette
-for dark mode (not `gray`), a sidebar-based layout with the lesson list and
-secondary page links, and a CSS custom-property theme system
-(`--theme-solid`, `--theme-link`, etc. in `src/styles/main.css`).
+pi-school is intentionally a close functional and visual clone of
+[opencode.school](https://github.com/opencodeschool/opencode.school) (same
+owner, continuity is a goal, not an accident). Ported near-verbatim, with
+branding swapped OpenCode→Pi:
 
-Deliberately **not** ported yet:
+- Inter (body) + JetBrains Mono (headings/code) via `@fontsource`
+- Tailwind's `stone` palette for dark mode (not `gray`)
+- Sidebar layout: lesson list, exercises section (hidden until exercises
+  exist), secondary page links, disenroll link (hidden until enrolled)
+- **Full per-student color theme picker** — 18 colors,
+  `window.__schoolThemePalettes` + `window.__applySchoolTheme`, CSS custom
+  properties set at runtime, persisted to `localStorage`
+- **Full enrollment flow** — rainbow-gradient CTA button
+  (`.rainbow-bg`), color picker with staggered swatch animation, student ID
+  card with a cipher-reveal animation and particle celebration effect on
+  first enroll (fast/no-celebration replay on subsequent page loads)
+- **`window.school` client-side progress API** — `enroll()`,
+  `fetchProgress()`, `markComplete()`, `markExerciseComplete()`,
+  `updateAllCheckmarks()`, theme getters/setters, device ID, visited-lessons
+  tracking. 1-second polling so agent-driven completions (via the API) show
+  up in the browser without a page reload. `?sid=` query param handling for
+  syncing a student ID from Pi back into the browser.
+- **Full progress/profile API**: `POST /api/enroll`, `GET/PUT/DELETE
+  /api/progress/:studentId` (including reset-all and incomplete/undo),
+  `GET/PUT /api/profile/:studentId` (structured interview data: coding
+  experience, AI tools used, editor, terminal comfort, learning style,
+  depth preference, languages, OS)
+- `/disenroll` — reset progress or fully disenroll, matching source exactly
+- `/llms.txt` — agent discovery document, adapted for Pi's actual API
+  surface and support channels
 
-- **Per-student color picker.** OpenCode School lets each enrolled student
-  pick an accent color from a palette, applied via `window.__schoolThemePalettes`
-  and CSS custom properties set at runtime. We use a single fixed "blue"
-  theme (the same default OpenCode School shows before a student picks) since
-  we haven't built enrollment yet. When enrollment lands, revisit whether to
-  port the full picker.
-- **Client-side progress JS** (`window.school` in OpenCode School's
-  Base.astro) — checkmarks, cached progress, `?sid=` handling. Ties to
-  enrollment, not yet built here.
+Deliberately **not** ported:
+
 - **Cloudflare AI Search widget** and **Umami analytics** — explicitly out of
-  scope for pi-school (decided early in planning).
-- **Exercises section in the sidebar** — no exercises collection exists yet.
+  scope for pi-school (decided early in planning)
+- **Intro video** — opencode.school's homepage has a rainbow-bordered intro
+  video above the enrollment widget, hosted on R2. We have no equivalent
+  asset (would need to actually record one) — omitted rather than faked
+- **OpenAPI spec / `/api/openapi.json`** — not built yet, not referenced in
+  `/llms.txt`
+- **Exercises content** — the `exercises` content collection exists (schema
+  only, matching source) so the API/lib layer works end to end, but no
+  exercise MDX files exist yet. Sidebar/homepage exercise sections are
+  conditionally hidden (`exercises.length > 0`) until real content lands.
 
-`src/pages/{about,tips,cheatsheet,glossary,troubleshooting,contributing,disenroll}.astro`
-are placeholder stubs ("Coming soon.") so the sidebar doesn't link to 404s.
-Replace with real content per lesson-plan.md's exercises/pages pass.
+### Known inherited quirk
 
-Biome's CSS linter doesn't know Tailwind v4's `theme()` function — same fix
-opencode.school uses: `correctness.noUnknownFunction: "off"` in `biome.json`
-(scoped to CSS only in practice, since it's the only place that function
-appears).
+The homepage's enrollment script calls `window.school.markComplete("enrollment")`
+after a student picks their color. This 400s silently (harmless —
+`markComplete` just returns `null` on a failed request) because
+"enrollment" isn't a real lesson slug in either project's content
+collection. Confirmed this exists in the current opencode.school source
+too, not something introduced here — left as-is for fidelity rather than
+"fixed" unilaterally.
+
+`src/pages/{about,tips,cheatsheet,glossary,troubleshooting,contributing}.astro`
+are still placeholder stubs ("Coming soon.") — `disenroll.astro` is fully
+built. Replace the rest with real content per plan.md's pages pass.
+
+### CSS/tooling gotchas hit while porting
+
+- Biome's CSS linter doesn't know Tailwind v4's `theme()` function — same
+  fix opencode.school uses: `correctness.noUnknownFunction: "off"` in
+  `biome.json`.
+- Biome's `complexity.noImportantStyles` rule (and running `biome check
+  --write --unsafe`) will silently strip `!important` from `main.css`,
+  which breaks real cascade-layer overrides (Tailwind Typography's
+  `@layer utilities` beats non-important `@layer base` rules regardless of
+  specificity). Set `complexity.noImportantStyles: "off"` and never run
+  `--unsafe` on this file.
+- `cloudflare:workers`' `env` binding: don't rely on `wrangler types`
+  (generates `worker-configuration.d.ts` with a conflicting `Env`
+  declaration). Instead declare `declare namespace Cloudflare { interface
+  Env { PROGRESS: KVNamespace } }` in `src/env.d.ts`, matching
+  `@cloudflare/workers-types`' own module augmentation pattern for
+  `cloudflare:workers`. Requires `/// <reference types="@cloudflare/workers-types" />`
+  for the global `KVNamespace` type to resolve. `script/build` and
+  `script/lint` no longer run `wrangler types` as a result.
 
 ## Content authoring
 
@@ -141,17 +190,26 @@ at least one.
 
 ## Progress API
 
-- `POST /api/enroll` — create a student, return `{ studentId, progress }`
+- `POST /api/enroll` — create a student, optional `{ deviceId }` body,
+  returns `{ studentId, progress }`
 - `GET /api/progress/:studentId` — fetch progress, 404 if unknown
-- `PUT /api/progress/:studentId` — body `{ lessonSlug }`, additive and
-  idempotent
+- `PUT /api/progress/:studentId` — body `{ lessonSlug }` or
+  `{ exerciseSlug }`, plus optional `source` (`"browser"` | `"agent"`) and
+  `model`. Additive and idempotent. Rejects agent-only lessons from
+  `source: "browser"`.
+- `DELETE /api/progress/:studentId` — body `{ lessonSlug }` or
+  `{ exerciseSlug }` to mark incomplete, or `{ reset: true }` to clear all
+  progress (keeps profile/createdAt/deviceId)
+- `GET /api/profile/:studentId`, `PUT /api/profile/:studentId` — structured
+  interview data (`codingExperience`, `aiTools`, `editor`,
+  `terminalComfort`, `learningStyle`, `depthPreference`, `languages`, `os`),
+  each field validated against a fixed enum/array where applicable
 - `GET /api/lessons`, `GET /api/lessons/:slug` — lesson content +
   agentInstructions as JSON, quiz boilerplate injected server-side
+- `GET /llms.txt` — plain-text agent discovery document
 
-Not yet built: `/api/profile/:studentId` (referenced by the Interview
-lesson's `agentInstructions` for storing interview answers — needs a KV
-schema and route before that lesson actually works end to end),
-`/llms.txt`, `/api/openapi.json`.
+Not yet built: `/api/exercises`, `/api/exercises/:slug` (no exercise
+content exists yet), `/api/openapi.json`.
 
 ## Custom domain
 

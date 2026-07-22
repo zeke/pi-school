@@ -18,6 +18,17 @@ const lessons = defineCollection({
   }),
 });
 
+const exercises = defineCollection({
+  loader: glob({ pattern: "**/*.{md,mdx}", base: "src/content/exercises" }),
+  schema: z.object({
+    title: z.string(),
+    slug: z.string(),
+    description: z.string(),
+    order: z.number(),
+    agentInstructions: z.string(),
+  }),
+});
+
 const pages = defineCollection({
   loader: glob({ pattern: "**/*.{md,mdx}", base: "src/content/pages" }),
   schema: z.object({
@@ -27,4 +38,4 @@ const pages = defineCollection({
   }),
 });
 
-export const collections = { lessons, pages };
+export const collections = { lessons, exercises, pages };

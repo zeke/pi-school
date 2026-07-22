@@ -5,37 +5,37 @@
 import { env } from "cloudflare:workers";
 import type { APIRoute } from "astro";
 import { createStudent } from "../../lib/progress";
+import { generateStudentId } from "../../lib/student-id";
 
-export const prerender = false;
-
-const CORS_HEADERS = {
+const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, HEAD, OPTIONS",
-};
-
-export const POST: APIRoute = async () => {
-  const kv = env.PROGRESS;
-  if (!kv) {
-    return new Response(
-      JSON.stringify({ error: "PROGRESS KV binding not configured" }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json", ...CORS_HEADERS },
-      },
-    );
-  }
-  const { studentId, progress } = await createStudent(kv);
-
-  return new Response(JSON.stringify({ studentId, progress }), {
-    status: 201,
-    headers: { "Content-Type": "application/json", ...CORS_HEADERS },
-  });
-};
-
-export const HEAD: APIRoute = async () => {
-  return new Response(null, { status: 200, headers: CORS_HEADERS });
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
 };
 
 export const OPTIONS: APIRoute = async () => {
-  return new Response(null, { status: 204, headers: CORS_HEADERS });
+  return new Response(null, { status: 204, headers: corsHeaders });
+};
+
+export const POST: APIRoute = async ({ request }) => {
+  const kv = env.PROGRESS;
+  const studentId = await generateStudentId(kv);
+
+  let deviceId: string | undefined;
+  try {
+    const body = (await request.json()) as { deviceId?: unknown };
+    if (typeof body?.deviceId === "string") deviceId = body.deviceId;
+  } catch {
+    // Body is optional; ignore parse errors
+  }
+
+  const progress = await createStudent(kv, studentId, deviceId);
+
+  return new Response(JSON.stringify({ studentId, progress }), {
+    status: 201,
+    headers: {
+      "Content-Type": "application/json",
+      ...corsHeaders,
+    },
+  });
 };

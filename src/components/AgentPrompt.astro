@@ -2,45 +2,57 @@
 // Copyright (c) 2026 Zeke Sikelianos
 // Licensed under the Apache 2.0 license found in the LICENSE file or at:
 //     https://opensource.org/licenses/Apache-2.0
-
-// Renders a copy-paste-ready prompt for the student to hand to Pi. The
-// prompt links back to this lesson's slug so Pi can fetch the lesson content
-// and agentInstructions via the API, and includes the student ID (once
-// enrollment exists) so Pi can track progress.
 interface Props {
 	title: string;
 	prompt?: string;
 }
 
 const { title, prompt } = Astro.props;
-const defaultPrompt = `Let's work on the "${title}" lesson from Pi School.`;
-const text = prompt ?? defaultPrompt;
 ---
 
-<div class="agent-prompt agent-prompt-box not-prose my-6 rounded-xl overflow-hidden">
-  <div class="flex items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-stone-700/50">
-    <span class="text-xs font-mono uppercase tracking-wider text-gray-500 dark:text-stone-400">Prompt for Pi</span>
-    <button type="button" class="agent-prompt-copy px-2.5 py-1 text-xs font-mono font-medium rounded transition-colors cursor-pointer theme-button">Copy</button>
+<div class="agent-prompt-card hidden mb-8" data-lesson-title={title} data-prompt={prompt}>
+  <p class="text-sm text-gray-500 dark:text-stone-400 mb-2 font-mono uppercase tracking-wider text-xs">
+    Prompt for Pi
+  </p>
+  <div class="agent-prompt-box relative rounded-lg overflow-hidden">
+    <pre class="agent-prompt-text px-5 py-4 font-mono text-sm text-gray-800 dark:text-stone-200 overflow-x-auto whitespace-pre-wrap leading-relaxed"></pre>
+    <button
+      class="agent-prompt-copy absolute top-2.5 right-2.5 px-2.5 py-1 text-xs font-mono font-medium rounded transition-colors cursor-pointer theme-button"
+    >
+      Copy
+    </button>
   </div>
-  <pre class="agent-prompt-text px-4 py-3 font-mono text-sm overflow-x-auto whitespace-pre-wrap leading-relaxed">{text}</pre>
+  <p class="agent-prompt-confirm hidden mt-5 text-sm font-mono text-gray-500 dark:text-stone-400">
+    Copied! Now go paste that into Pi...
+  </p>
 </div>
 
-<script>
-	document.addEventListener("DOMContentLoaded", () => {
-		for (const container of document.querySelectorAll(".agent-prompt")) {
-			const button = container.querySelector(".agent-prompt-copy");
-			const textEl = container.querySelector(".agent-prompt-text");
-			if (!(button instanceof HTMLButtonElement) || !textEl) continue;
+<script is:inline>
+  (function() {
+    if (!window.school) return;
+    var studentId = window.school.getStudentId();
+    if (!studentId) return;
 
-			button.addEventListener("click", () => {
-				navigator.clipboard.writeText(textEl.textContent ?? "").then(() => {
-					const original = button.textContent;
-					button.textContent = "Copied!";
-					setTimeout(() => {
-						button.textContent = original;
-					}, 2000);
-				});
-			});
-		}
-	});
+    var cards = document.querySelectorAll(".agent-prompt-card");
+    cards.forEach(function(card) {
+      var lessonTitle = card.getAttribute("data-lesson-title");
+      var promptText = card.querySelector(".agent-prompt-text");
+      var copyBtn = card.querySelector(".agent-prompt-copy");
+      var confirm = card.querySelector(".agent-prompt-confirm");
+      if (!promptText) return;
+
+      var customPrompt = card.getAttribute("data-prompt");
+      var prompt = "I'm enrolled in Pi School as " + studentId + "\n\n" + (customPrompt || "Let's work on the \"" + lessonTitle + "\" lesson together!") + "\n\nFetch " + window.location.origin + "/llms.txt for instructions.";
+      promptText.textContent = prompt;
+      card.classList.remove("hidden");
+
+      if (copyBtn) {
+        copyBtn.addEventListener("click", function() {
+          navigator.clipboard.writeText(prompt).then(function() {
+            if (confirm) confirm.classList.remove("hidden");
+          });
+        });
+      }
+    });
+  })();
 </script>

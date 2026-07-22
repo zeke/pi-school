@@ -1,3 +1,8 @@
-/// <reference path="../.astro/types.d.ts" />
-/// <reference path="../worker-configuration.d.ts" />
-/// <reference types="@astrojs/cloudflare/entrypoint-types/node" />
+/// <reference types="astro/client" />
+/// <reference types="@cloudflare/workers-types" />
+
+declare namespace Cloudflare {
+  interface Env {
+    PROGRESS: KVNamespace;
+  }
+}

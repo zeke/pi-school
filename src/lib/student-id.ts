@@ -2,96 +2,66 @@
 // Licensed under the Apache 2.0 license found in the LICENSE file or at:
 //     https://opensource.org/licenses/Apache-2.0
 
-// Student IDs look like "curious-hacker-2019": an adjective, a noun, and a
-// 4-digit number. ~9.7 million possible combinations, unguessable enough for
-// low-stakes progress data with no authentication.
-
-const ADJECTIVES = [
-  "agile",
-  "amber",
-  "ancient",
-  "bold",
-  "brave",
-  "bright",
-  "calm",
+const adjectives = [
+  "based",
   "clever",
-  "cosmic",
+  "crafty",
   "curious",
-  "daring",
-  "eager",
-  "fleet",
-  "fuzzy",
-  "gentle",
-  "golden",
-  "happy",
-  "humble",
-  "jolly",
-  "keen",
-  "lively",
+  "extra",
+  "hyped",
+  "lowkey",
   "lucky",
-  "merry",
-  "mighty",
   "nimble",
-  "plucky",
-  "quiet",
-  "quirky",
-  "radiant",
-  "rapid",
+  "online",
+  "scrappy",
   "sharp",
-  "spry",
-  "steady",
-  "swift",
-  "vivid",
-  "witty",
+  "smooth",
+  "vibing",
 ];
 
-const NOUNS = [
-  "agent",
-  "anchor",
-  "beacon",
+const nouns = [
   "builder",
-  "comet",
-  "compass",
-  "coyote",
-  "drifter",
-  "falcon",
-  "forge",
-  "fox",
-  "glacier",
+  "coder",
+  "crafter",
   "hacker",
-  "harbor",
-  "heron",
-  "kestrel",
-  "lantern",
-  "lynx",
   "maker",
-  "mariner",
-  "otter",
-  "pioneer",
-  "raven",
-  "river",
-  "rover",
-  "sailor",
-  "scout",
-  "sparrow",
-  "tinker",
-  "voyager",
+  "minion",
+  "operator",
+  "scholar",
+  "student",
+  "tinkerer",
+  "wizard",
 ];
 
-function randomFrom<T>(list: T[]): T {
-  return list[Math.floor(Math.random() * list.length)];
+function pick<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
 }
 
 function randomNumber(): number {
-  return Math.floor(Math.random() * 9000) + 1000;
+  return Math.floor(Math.random() * 9000) + 1000; // 1000-9999
 }
 
-export function generateStudentId(): string {
-  return `${randomFrom(ADJECTIVES)}-${randomFrom(NOUNS)}-${randomNumber()}`;
+/**
+ * Generate a student ID like "curious-hacker-2019".
+ *
+ * If a KV namespace is provided, checks for collisions and retries
+ * up to `maxRetries` times.
+ */
+export async function generateStudentId(
+  kv?: KVNamespace,
+  maxRetries = 10,
+): Promise<string> {
+  for (let i = 0; i < maxRetries; i++) {
+    const id = `${pick(adjectives)}-${pick(nouns)}-${randomNumber()}`;
+    if (!kv) return id;
+
+    const existing = await kv.get(`student:${id}`);
+    if (!existing) return id;
+  }
+  throw new Error("Failed to generate a unique student ID after retries");
 }
 
-const STUDENT_ID_PATTERN = /^[a-z]+-[a-z]+-\d{4}$/;
-
+/** Validate that a string looks like a valid student ID format. */
 export function isValidStudentId(id: string): boolean {
-  return STUDENT_ID_PATTERN.test(id);
+  return /^[a-z]+-[a-z]+-\d{4}$/.test(id);
 }

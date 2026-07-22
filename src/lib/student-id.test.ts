@@ -2,14 +2,26 @@ import { describe, expect, it } from "vitest";
 import { generateStudentId, isValidStudentId } from "./student-id";
 
 describe("generateStudentId", () => {
-  it("produces an adjective-noun-nnnn id", () => {
-    const id = generateStudentId();
+  it("produces an adjective-noun-nnnn id", async () => {
+    const id = await generateStudentId();
     expect(isValidStudentId(id)).toBe(true);
   });
 
-  it("produces different ids across calls", () => {
-    const ids = new Set(Array.from({ length: 20 }, () => generateStudentId()));
+  it("produces different ids across calls", async () => {
+    const ids = new Set(
+      await Promise.all(Array.from({ length: 20 }, () => generateStudentId())),
+    );
     expect(ids.size).toBeGreaterThan(1);
+  });
+
+  it("retries on collision when a kv namespace is provided", async () => {
+    const seen = new Set<string>();
+    const kv = {
+      get: async (key: string) => (seen.has(key) ? "taken" : null),
+    } as unknown as KVNamespace;
+
+    const id = await generateStudentId(kv);
+    expect(isValidStudentId(id)).toBe(true);
   });
 });
 

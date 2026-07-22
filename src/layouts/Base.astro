@@ -22,8 +22,8 @@ const {
 } = Astro.props;
 const pageTitle = title ? `${title} | Pi School` : "Pi School";
 
-const lessons = (await getCollection("lessons"))
-	.sort((a, b) => a.data.order - b.data.order);
+const lessons = (await getCollection("lessons")).sort((a, b) => a.data.order - b.data.order);
+const exercises = (await getCollection("exercises")).sort((a, b) => a.data.order - b.data.order);
 const currentPath = Astro.url.pathname;
 
 const secondaryLinks = [
@@ -45,12 +45,527 @@ const secondaryLinks = [
     <meta name="color-scheme" content="light dark" />
     <title>{pageTitle}</title>
     <script is:inline>
+      window.__schoolThemePalettes = {
+        blue: {
+          solid: "#2563eb",
+          solidHover: "#1d4ed8",
+          link: "#2563eb",
+          linkDark: "#60a5fa",
+          softBg: "#eff6ff",
+          softBorder: "#bfdbfe",
+          softText: "#1d4ed8",
+          softBgDark: "rgba(37, 99, 235, 0.18)",
+          softBorderDark: "rgba(96, 165, 250, 0.35)",
+          softTextDark: "#93c5fd",
+          cardText: "#dbeafe",
+        },
+        indigo: {
+          solid: "#4f46e5",
+          solidHover: "#4338ca",
+          link: "#4338ca",
+          linkDark: "#a5b4fc",
+          softBg: "#eef2ff",
+          softBorder: "#c7d2fe",
+          softText: "#4338ca",
+          softBgDark: "rgba(79, 70, 229, 0.18)",
+          softBorderDark: "rgba(165, 180, 252, 0.35)",
+          softTextDark: "#c7d2fe",
+          cardText: "#e0e7ff",
+        },
+        violet: {
+          solid: "#7c3aed",
+          solidHover: "#6d28d9",
+          link: "#6d28d9",
+          linkDark: "#c4b5fd",
+          softBg: "#f5f3ff",
+          softBorder: "#ddd6fe",
+          softText: "#6d28d9",
+          softBgDark: "rgba(124, 58, 237, 0.18)",
+          softBorderDark: "rgba(196, 181, 253, 0.35)",
+          softTextDark: "#ddd6fe",
+          cardText: "#ede9fe",
+        },
+        purple: {
+          solid: "#9333ea",
+          solidHover: "#7e22ce",
+          link: "#7e22ce",
+          linkDark: "#d8b4fe",
+          softBg: "#faf5ff",
+          softBorder: "#e9d5ff",
+          softText: "#7e22ce",
+          softBgDark: "rgba(147, 51, 234, 0.18)",
+          softBorderDark: "rgba(216, 180, 254, 0.35)",
+          softTextDark: "#e9d5ff",
+          cardText: "#f3e8ff",
+        },
+        fuchsia: {
+          solid: "#c026d3",
+          solidHover: "#a21caf",
+          link: "#a21caf",
+          linkDark: "#f0abfc",
+          softBg: "#fdf4ff",
+          softBorder: "#f5d0fe",
+          softText: "#a21caf",
+          softBgDark: "rgba(192, 38, 211, 0.18)",
+          softBorderDark: "rgba(240, 171, 252, 0.35)",
+          softTextDark: "#f5d0fe",
+          cardText: "#fae8ff",
+        },
+        pink: {
+          solid: "#db2777",
+          solidHover: "#be185d",
+          link: "#be185d",
+          linkDark: "#f472b6",
+          softBg: "#fdf2f8",
+          softBorder: "#fbcfe8",
+          softText: "#be185d",
+          softBgDark: "rgba(219, 39, 119, 0.18)",
+          softBorderDark: "rgba(244, 114, 182, 0.35)",
+          softTextDark: "#f9a8d4",
+          cardText: "#fce7f3",
+        },
+        rose: {
+          solid: "#e11d48",
+          solidHover: "#be123c",
+          link: "#be123c",
+          linkDark: "#fda4af",
+          softBg: "#fff1f2",
+          softBorder: "#fecdd3",
+          softText: "#be123c",
+          softBgDark: "rgba(225, 29, 72, 0.18)",
+          softBorderDark: "rgba(251, 113, 133, 0.35)",
+          softTextDark: "#fda4af",
+          cardText: "#ffe4e6",
+        },
+        red: {
+          solid: "#dc2626",
+          solidHover: "#b91c1c",
+          link: "#b91c1c",
+          linkDark: "#fca5a5",
+          softBg: "#fef2f2",
+          softBorder: "#fecaca",
+          softText: "#b91c1c",
+          softBgDark: "rgba(220, 38, 38, 0.18)",
+          softBorderDark: "rgba(248, 113, 113, 0.35)",
+          softTextDark: "#fca5a5",
+          cardText: "#fee2e2",
+        },
+        orange: {
+          solid: "#ea580c",
+          solidHover: "#c2410c",
+          link: "#c2410c",
+          linkDark: "#fdba74",
+          softBg: "#fff7ed",
+          softBorder: "#fed7aa",
+          softText: "#c2410c",
+          softBgDark: "rgba(234, 88, 12, 0.18)",
+          softBorderDark: "rgba(251, 146, 60, 0.35)",
+          softTextDark: "#fdba74",
+          cardText: "#ffedd5",
+        },
+        amber: {
+          solid: "#b45309",
+          solidHover: "#92400e",
+          link: "#92400e",
+          linkDark: "#fcd34d",
+          softBg: "#fffbeb",
+          softBorder: "#fde68a",
+          softText: "#92400e",
+          softBgDark: "rgba(180, 83, 9, 0.18)",
+          softBorderDark: "rgba(251, 191, 36, 0.35)",
+          softTextDark: "#fcd34d",
+          cardText: "#fef3c7",
+        },
+        yellow: {
+          solid: "#ca8a04",
+          solidHover: "#a16207",
+          link: "#a16207",
+          linkDark: "#facc15",
+          softBg: "#fefce8",
+          softBorder: "#fef08a",
+          softText: "#a16207",
+          softBgDark: "rgba(202, 138, 4, 0.18)",
+          softBorderDark: "rgba(250, 204, 21, 0.35)",
+          softTextDark: "#fde047",
+          cardText: "#fef9c3",
+        },
+        lime: {
+          solid: "#4d7c0f",
+          solidHover: "#3f6212",
+          link: "#4d7c0f",
+          linkDark: "#bef264",
+          softBg: "#f7fee7",
+          softBorder: "#d9f99d",
+          softText: "#4d7c0f",
+          softBgDark: "rgba(77, 124, 15, 0.18)",
+          softBorderDark: "rgba(132, 204, 22, 0.35)",
+          softTextDark: "#bef264",
+          cardText: "#ecfccb",
+        },
+        green: {
+          solid: "#15803d",
+          solidHover: "#166534",
+          link: "#166534",
+          linkDark: "#86efac",
+          softBg: "#f0fdf4",
+          softBorder: "#bbf7d0",
+          softText: "#166534",
+          softBgDark: "rgba(21, 128, 61, 0.18)",
+          softBorderDark: "rgba(74, 222, 128, 0.35)",
+          softTextDark: "#86efac",
+          cardText: "#dcfce7",
+        },
+        emerald: {
+          solid: "#059669",
+          solidHover: "#047857",
+          link: "#047857",
+          linkDark: "#6ee7b7",
+          softBg: "#ecfdf5",
+          softBorder: "#a7f3d0",
+          softText: "#047857",
+          softBgDark: "rgba(5, 150, 105, 0.18)",
+          softBorderDark: "rgba(110, 231, 183, 0.35)",
+          softTextDark: "#a7f3d0",
+          cardText: "#d1fae5",
+        },
+        teal: {
+          solid: "#0f766e",
+          solidHover: "#115e59",
+          link: "#0f766e",
+          linkDark: "#5eead4",
+          softBg: "#f0fdfa",
+          softBorder: "#99f6e4",
+          softText: "#115e59",
+          softBgDark: "rgba(15, 118, 110, 0.2)",
+          softBorderDark: "rgba(94, 234, 212, 0.35)",
+          softTextDark: "#99f6e4",
+          cardText: "#ccfbf1",
+        },
+        cyan: {
+          solid: "#0e7490",
+          solidHover: "#155e75",
+          link: "#155e75",
+          linkDark: "#67e8f9",
+          softBg: "#ecfeff",
+          softBorder: "#a5f3fc",
+          softText: "#155e75",
+          softBgDark: "rgba(14, 116, 144, 0.2)",
+          softBorderDark: "rgba(103, 232, 249, 0.35)",
+          softTextDark: "#a5f3fc",
+          cardText: "#cffafe",
+        },
+        sky: {
+          solid: "#0284c7",
+          solidHover: "#0369a1",
+          link: "#0369a1",
+          linkDark: "#7dd3fc",
+          softBg: "#f0f9ff",
+          softBorder: "#bae6fd",
+          softText: "#0369a1",
+          softBgDark: "rgba(2, 132, 199, 0.18)",
+          softBorderDark: "rgba(56, 189, 248, 0.35)",
+          softTextDark: "#bae6fd",
+          cardText: "#e0f2fe",
+        },
+        slate: {
+          solid: "#475569",
+          solidHover: "#334155",
+          link: "#334155",
+          linkDark: "#cbd5e1",
+          softBg: "#f8fafc",
+          softBorder: "#cbd5e1",
+          softText: "#334155",
+          softBgDark: "rgba(71, 85, 105, 0.3)",
+          softBorderDark: "rgba(148, 163, 184, 0.35)",
+          softTextDark: "#cbd5e1",
+          cardText: "#e2e8f0",
+        },
+      };
+
+      window.__applySchoolTheme = function(themeName) {
+        var palette = window.__schoolThemePalettes[themeName] || window.__schoolThemePalettes.blue;
+        var root = document.documentElement;
+        root.style.setProperty("--theme-solid", palette.solid);
+        root.style.setProperty("--theme-solid-hover", palette.solidHover);
+        root.style.setProperty("--theme-link", palette.link);
+        root.style.setProperty("--theme-link-dark", palette.linkDark);
+        root.style.setProperty("--theme-soft-bg", palette.softBg);
+        root.style.setProperty("--theme-soft-border", palette.softBorder);
+        root.style.setProperty("--theme-soft-text", palette.softText);
+        root.style.setProperty("--theme-soft-bg-dark", palette.softBgDark);
+        root.style.setProperty("--theme-soft-border-dark", palette.softBorderDark);
+        root.style.setProperty("--theme-soft-text-dark", palette.softTextDark);
+        root.style.setProperty("--theme-card-text", palette.cardText);
+        root.dataset.themeColor = window.__schoolThemePalettes[themeName] ? themeName : "blue";
+      };
+
+      try {
+        window.__applySchoolTheme(localStorage.getItem("themeColor") || "blue");
+      } catch {
+        window.__applySchoolTheme("blue");
+      }
+    </script>
+    <script is:inline>
       if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
         document.documentElement.classList.add("dark");
       }
       window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
         document.documentElement.classList.toggle("dark", e.matches);
       });
+    </script>
+    <script is:inline>
+      // Progress tracking API — defined in <head> so page-level scripts can use it
+      const schoolMemoryStorage = {};
+
+      function readSchoolStorage(key) {
+        try {
+          const value = localStorage.getItem(key);
+          return value === null ? schoolMemoryStorage[key] || null : value;
+        } catch {
+          return schoolMemoryStorage[key] || null;
+        }
+      }
+
+      function writeSchoolStorage(key, value) {
+        schoolMemoryStorage[key] = value;
+        try {
+          localStorage.setItem(key, value);
+        } catch {
+          // Some browsers/extensions block localStorage. Keep the current page working.
+        }
+      }
+
+      function createDeviceId() {
+        if (window.crypto && typeof window.crypto.randomUUID === "function") {
+          return window.crypto.randomUUID();
+        }
+        return `device-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      }
+
+      window.school = {
+        getStudentId() {
+          return readSchoolStorage("studentId");
+        },
+
+        setStudentId(id) {
+          writeSchoolStorage("studentId", id);
+        },
+
+        getDeviceId() {
+          let deviceId = readSchoolStorage("deviceId");
+          if (!deviceId) {
+            deviceId = createDeviceId();
+            writeSchoolStorage("deviceId", deviceId);
+          }
+          return deviceId;
+        },
+
+        getThemeColor() {
+          return readSchoolStorage("themeColor") || "blue";
+        },
+
+        getThemePalettes() {
+          return window.__schoolThemePalettes;
+        },
+
+        setThemeColor(themeName) {
+          const palettes = this.getThemePalettes();
+          const nextTheme = palettes[themeName] ? themeName : "blue";
+          writeSchoolStorage("themeColor", nextTheme);
+          window.__applySchoolTheme(nextTheme);
+          return nextTheme;
+        },
+
+        getCachedProgress() {
+          try {
+            const p = JSON.parse(readSchoolStorage("progress") || "null");
+            this._progressCache = p;
+            return p;
+          } catch { return null; }
+        },
+
+        setCachedProgress(progress) {
+          this._progressCache = progress;
+          writeSchoolStorage("progress", JSON.stringify(progress));
+        },
+
+        _progressCache: null,
+
+        isLessonComplete(slug) {
+          const progress = this.getCachedProgress();
+          return progress?.completedLessons?.some((l) => (typeof l === "string" ? l : l.slug) === slug) || false;
+        },
+
+        getLessonCompletion(slug) {
+          const progress = this.getCachedProgress();
+          const entry = progress?.completedLessons?.find((l) => (typeof l === "string" ? l : l.slug) === slug);
+          if (!entry) return null;
+          return typeof entry === "string" ? { slug: entry, completedAt: null, source: "browser" } : entry;
+        },
+
+        isExerciseComplete(slug) {
+          const progress = this.getCachedProgress();
+          return progress?.completedExercises?.some((e) => (typeof e === "string" ? e : e.slug) === slug) || false;
+        },
+
+        getExerciseCompletion(slug) {
+          const progress = this.getCachedProgress();
+          const entry = progress?.completedExercises?.find((e) => (typeof e === "string" ? e : e.slug) === slug);
+          if (!entry) return null;
+          return typeof entry === "string" ? { slug: entry, completedAt: null, source: "browser" } : entry;
+        },
+
+        getVisitedLessons() {
+          try {
+            return JSON.parse(readSchoolStorage("visitedLessons") || "[]");
+          } catch { return []; }
+        },
+
+        isLessonVisited(slug) {
+          return this.getVisitedLessons().includes(slug);
+        },
+
+        markLessonVisited(slug) {
+          const visited = this.getVisitedLessons();
+          if (!visited.includes(slug)) {
+            visited.push(slug);
+            writeSchoolStorage("visitedLessons", JSON.stringify(visited));
+          }
+        },
+
+        async enroll() {
+          const deviceId = this.getDeviceId();
+          const res = await fetch("/api/enroll", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ deviceId }),
+          });
+          if (!res.ok) throw new Error("Enrollment failed");
+          const data = await res.json();
+          this.setStudentId(data.studentId);
+          this.setCachedProgress(data.progress);
+          return data;
+        },
+
+        async fetchProgress() {
+          const studentId = this.getStudentId();
+          if (!studentId) return null;
+          const res = await fetch(`/api/progress/${studentId}`);
+          if (!res.ok) return null;
+          const progress = await res.json();
+          this.setCachedProgress(progress);
+          return progress;
+        },
+
+        async markComplete(lessonSlug) {
+          const studentId = this.getStudentId();
+          if (!studentId) return null;
+          const res = await fetch(`/api/progress/${studentId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ lessonSlug, source: "browser" }),
+          });
+          if (!res.ok) return null;
+          const progress = await res.json();
+          this.setCachedProgress(progress);
+          return progress;
+        },
+
+        async markExerciseComplete(exerciseSlug) {
+          const studentId = this.getStudentId();
+          if (!studentId) return null;
+          const res = await fetch(`/api/progress/${studentId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ exerciseSlug, source: "browser" }),
+          });
+          if (!res.ok) return null;
+          const progress = await res.json();
+          this.setCachedProgress(progress);
+          return progress;
+        },
+
+        updateAllCheckmarks() {
+          let nextIncompleteSet = false;
+          document.querySelectorAll("[data-lesson-slug]").forEach((el) => {
+            const slug = el.getAttribute("data-lesson-slug");
+            const isStub = el.getAttribute("data-lesson-stub") === "true";
+            const rowEl = el.querySelector(".lesson-row");
+            const linkEl = el.querySelector(".lesson-link");
+            const ctaEl = el.querySelector(".lesson-cta");
+            const statusEl = el.querySelector(".lesson-status");
+            const checkEl = el.querySelector(".lesson-check");
+            const dotEl = el.querySelector(".lesson-status-dot");
+            const complete = this.isLessonComplete(slug);
+            const isNext = !complete && !isStub && !nextIncompleteSet;
+            if (isNext) nextIncompleteSet = true;
+
+            if (rowEl) {
+              rowEl.classList.toggle("lesson-row--next", isNext);
+            }
+            if (linkEl) {
+              linkEl.classList.toggle("sm:flex-1", isNext);
+            }
+            if (ctaEl) {
+              ctaEl.classList.toggle("hidden", !isNext);
+              ctaEl.classList.toggle("inline-block", isNext);
+              if (isNext) ctaEl.textContent = this.isLessonVisited(slug) ? "Continue" : "Start";
+            }
+            if (statusEl) {
+              statusEl.classList.toggle("lesson-status--complete", complete);
+            }
+            if (checkEl) {
+              checkEl.classList.toggle("hidden", !complete);
+              checkEl.classList.toggle("flex", complete);
+            }
+            if (dotEl) dotEl.classList.toggle("hidden", complete);
+          });
+          // Update sidebar lesson completion circles
+          document.querySelectorAll("[data-sidebar-slug]").forEach((el) => {
+            const slug = el.getAttribute("data-sidebar-slug");
+            const circle = el.querySelector(".sidebar-check");
+            if (circle) {
+              const complete = this.isLessonComplete(slug);
+              circle.textContent = complete ? "\u2713" : "";
+              circle.classList.toggle("hidden", !complete);
+              circle.classList.toggle("flex", complete);
+            }
+          });
+          // Update sidebar exercise completion circles
+          document.querySelectorAll("[data-sidebar-exercise-slug]").forEach((el) => {
+            const slug = el.getAttribute("data-sidebar-exercise-slug");
+            const circle = el.querySelector(".sidebar-exercise-check");
+            if (circle) {
+              const complete = this.isExerciseComplete(slug);
+              circle.textContent = complete ? "\u2713" : "";
+              circle.classList.toggle("hidden", !complete);
+              circle.classList.toggle("flex", complete);
+            }
+          });
+          // Update exercise completion checkmarks (homepage + exercises index)
+          document.querySelectorAll("[data-exercise-slug]").forEach((el) => {
+            const slug = el.getAttribute("data-exercise-slug");
+            const complete = this.isExerciseComplete(slug);
+            const statusEl = el.querySelector(".exercise-status");
+            const checkEl = el.querySelector(".exercise-check");
+            const dotEl = el.querySelector(".exercise-status-dot");
+            if (statusEl) statusEl.classList.toggle("lesson-status--complete", complete);
+            if (checkEl) {
+              checkEl.classList.toggle("hidden", !complete);
+              checkEl.classList.toggle("flex", complete);
+            }
+            if (dotEl) dotEl.classList.toggle("hidden", complete);
+          });
+        },
+
+        updateEnrolledIndicator() {
+          const id = this.getStudentId();
+          const disenrollLink = document.getElementById("sidebar-disenroll-link");
+          if (disenrollLink && id) {
+            disenrollLink.classList.remove("hidden");
+          }
+        },
+      };
     </script>
   </head>
   <body class="min-h-screen">
@@ -84,8 +599,9 @@ const secondaryLinks = [
           {lessons.map((lesson) => {
             const href = `/lessons/${lesson.data.slug}`;
             const isActive = currentPath === href || currentPath === `${href}/`;
+            const isStub = lesson.body?.trim() === "Coming soon.";
             return (
-              <li>
+              <li data-sidebar-slug={lesson.data.slug}>
                 <a
                   href={href}
                   class:list={[
@@ -93,17 +609,56 @@ const secondaryLinks = [
                     isActive
                       ? "theme-active-nav font-medium"
                       : "text-gray-600 hover:text-gray-900 hover:bg-gray-50 dark:text-stone-400 dark:hover:text-stone-200 dark:hover:bg-stone-800",
+                    isStub && "opacity-50",
                   ]}
                 >
                   <span>
                     <span class="text-gray-400 dark:text-stone-600 mr-1.5">{String(lesson.data.order).padStart(2, "0")}.</span>
                     {lesson.data.title}
                   </span>
+                  <span class="sidebar-check theme-solid-bg w-4 h-4 rounded-full text-white text-[10px] font-bold items-center justify-center shrink-0 ml-2 hidden"></span>
                 </a>
               </li>
             );
           })}
         </ol>
+        {exercises.length > 0 && (
+          <div class="mt-6 pt-4 border-t border-gray-200 dark:border-stone-800">
+            <a
+              href="/exercises"
+              class:list={[
+                "block px-3 py-1.5 rounded-md text-xs font-mono uppercase tracking-wider mb-1",
+                currentPath === "/exercises" || currentPath === "/exercises/"
+                  ? "theme-active-nav font-medium"
+                  : "text-gray-500 dark:text-stone-500 hover:text-gray-900 dark:hover:text-stone-200",
+              ]}
+            >
+              Exercises
+            </a>
+            <ol class="space-y-1">
+              {exercises.map((exercise) => {
+                const href = `/exercises/${exercise.data.slug}`;
+                const isActive = currentPath === href || currentPath === `${href}/`;
+                return (
+                  <li data-sidebar-exercise-slug={exercise.data.slug}>
+                    <a
+                      href={href}
+                      class:list={[
+                        "flex items-center justify-between px-3 py-1.5 rounded-md text-sm transition-colors",
+                        isActive
+                          ? "theme-active-nav font-medium"
+                          : "text-gray-600 hover:text-gray-900 hover:bg-gray-50 dark:text-stone-400 dark:hover:text-stone-200 dark:hover:bg-stone-800",
+                      ]}
+                    >
+                      <span>{exercise.data.title}</span>
+                      <span class="sidebar-exercise-check theme-solid-bg w-4 h-4 rounded-full text-white text-[10px] font-bold items-center justify-center shrink-0 ml-2 hidden"></span>
+                    </a>
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
+        )}
         <div class="mt-6 pt-4 border-t border-gray-200 dark:border-stone-800">
           {secondaryLinks.map((link) => {
             const isActive = currentPath === link.href || currentPath === `${link.href}/`;
@@ -121,6 +676,13 @@ const secondaryLinks = [
               </a>
             );
           })}
+          <a
+            id="sidebar-disenroll-link"
+            href="/disenroll"
+            class="hidden block px-3 py-1.5 rounded-md text-sm transition-colors text-gray-600 hover:text-gray-900 hover:bg-gray-50 dark:text-stone-400 dark:hover:text-stone-200 dark:hover:bg-stone-800"
+          >
+            Disenroll
+          </a>
         </div>
         <div class="mt-6 pt-4 border-t border-gray-200 dark:border-stone-800 flex items-center gap-5 px-3">
           <div class="relative group">
@@ -171,6 +733,36 @@ const secondaryLinks = [
           }
         });
       }
+
+      // Handle ?sid= param: save student ID from URL and clean up
+      (function() {
+        const params = new URLSearchParams(window.location.search);
+        const sid = params.get("sid");
+        if (sid) {
+          window.school.setStudentId(sid);
+          const url = new URL(window.location);
+          url.searchParams.delete("sid");
+          window.history.replaceState({}, "", url.pathname + url.search);
+          window.school.updateEnrolledIndicator();
+          window.school.fetchProgress().then(() => {
+            window.school.updateAllCheckmarks();
+          });
+        } else if (window.school.getStudentId()) {
+          window.school.updateEnrolledIndicator();
+          window.school.updateAllCheckmarks();
+          window.school.fetchProgress().then(() => {
+            window.school.updateAllCheckmarks();
+          });
+        }
+
+        if (window.school.getStudentId()) {
+          setInterval(function() {
+            window.school.fetchProgress().then(function() {
+              window.school.updateAllCheckmarks();
+            });
+          }, 1000);
+        }
+      })();
     </script>
   </body>
 </html>
