@@ -26,18 +26,28 @@ Pi is a terminal-based agent — there's no separate app to download. You'll ins
   <div class="divide-y divide-gray-100 dark:divide-stone-800">
     <div class="flex items-center justify-between px-6 py-4" id="check-os">
       <span class="text-base text-gray-600 dark:text-stone-300">Operating system</span>
-      <span class="check-value font-mono text-base">…</span>
+      <span class="flex items-center gap-3 text-base font-mono">
+        <span class="check-value"><span class="spinner"></span></span>
+        <span class="check-icon w-5 flex items-center justify-center"></span>
+      </span>
     </div>
     <div class="flex items-center justify-between px-6 py-4" id="check-internet">
       <span class="text-base text-gray-600 dark:text-stone-300">Internet</span>
-      <span class="check-value font-mono text-base">…</span>
+      <span class="flex items-center gap-3 text-base font-mono">
+        <span class="check-value"><span class="spinner"></span></span>
+        <span class="check-icon w-5 flex items-center justify-center"></span>
+      </span>
     </div>
   </div>
 </div>
 
+<p id="system-check-success" class="hidden mt-5 px-6 text-sm font-mono text-gray-500 dark:text-stone-400 not-prose">Your system is ready!</p>
+
 ## Install Pi
 
 <div id="install-section" class="not-prose">
+
+<div id="install-loading" class="my-6 text-sm text-gray-500 dark:text-stone-400">Detecting your operating system…</div>
 
 <div id="install-macos-linux" class="hidden">
 
@@ -78,6 +88,99 @@ npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 </div>
 
 You'll need [Node.js](https://nodejs.org) if you're installing via npm/pnpm/bun.
+
+<script>{`
+document.addEventListener("DOMContentLoaded", function() {
+  var CHECK = '<span class="theme-solid-bg inline-flex w-5 h-5 rounded-full text-white text-[11px] font-bold items-center justify-center">\\u2713</span>';
+  var WARN = '<span class="text-yellow-500 dark:text-yellow-400">!</span>';
+
+  function setCheck(id, value, icon) {
+    var row = document.getElementById(id);
+    if (!row) return;
+    var val = row.querySelector(".check-value");
+    var ico = row.querySelector(".check-icon");
+    if (val) val.textContent = value;
+    if (ico) ico.innerHTML = icon;
+  }
+
+  function delay(ms) {
+    return new Promise(function(r) { setTimeout(r, ms); });
+  }
+
+  // Detect OS from user agent
+  function detectOS() {
+    var ua = navigator.userAgent;
+    if (/Macintosh|Mac OS X/.test(ua)) return "macOS";
+    if (/Windows/.test(ua)) return "Windows";
+    if (/Linux/.test(ua)) return "Linux";
+    if (/CrOS/.test(ua)) return "ChromeOS";
+    return "Unknown";
+  }
+
+  // Measure connectivity: try navigator.connection first, fall back to fetch timing
+  async function measureConnectivity() {
+    var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (conn && conn.rtt !== undefined && conn.rtt > 0) {
+      var rtt = conn.rtt;
+      var label = "Connected, ~" + rtt + "ms latency";
+      var icon = rtt < 300 ? CHECK : WARN;
+      return { label: label, icon: icon };
+    }
+
+    if (!navigator.onLine) {
+      return { label: "Offline", icon: WARN };
+    }
+
+    try {
+      var start = performance.now();
+      await fetch("/api/enroll", { method: "HEAD", cache: "no-store" }).catch(function() {});
+      var elapsed = Math.round(performance.now() - start);
+      var label2 = "Connected, ~" + elapsed + "ms latency";
+      var icon2 = elapsed < 500 ? CHECK : WARN;
+      return { label: label2, icon: icon2 };
+    } catch (e) {
+      return { label: navigator.onLine ? "Connected" : "Offline", icon: navigator.onLine ? CHECK : WARN };
+    }
+  }
+
+  // Run system checks with staggered reveal
+  async function runChecks() {
+    await delay(300);
+    var os = detectOS();
+    var supportedOS = ["macOS", "Windows", "Linux"];
+    var osIcon = supportedOS.indexOf(os) !== -1 ? CHECK : WARN;
+    setCheck("check-os", os, osIcon);
+
+    await delay(400);
+    var result = await measureConnectivity();
+    setCheck("check-internet", result.label, result.icon);
+
+    var allPassed =
+      ["check-os", "check-internet"].every(function(id) {
+        var row = document.getElementById(id);
+        return row && row.querySelector(".check-icon").innerHTML.indexOf("theme-solid-bg") !== -1;
+      });
+    if (allPassed) {
+      var successEl = document.getElementById("system-check-success");
+      if (successEl) successEl.classList.remove("hidden");
+    }
+  }
+
+  // OS detection for install section
+  var ua = navigator.userAgent;
+  var os = "other";
+  if (/Macintosh|Mac OS X/.test(ua) || /Linux/.test(ua)) os = "macos-linux";
+  else if (/Windows/.test(ua)) os = "windows";
+
+  var loading = document.getElementById("install-loading");
+  if (loading) loading.classList.add("hidden");
+
+  var section = document.getElementById("install-" + os);
+  if (section) section.classList.remove("hidden");
+
+  runChecks();
+});
+`}</script>
 
 ## Watch a quick walkthrough
 
