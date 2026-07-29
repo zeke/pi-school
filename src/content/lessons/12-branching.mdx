@@ -1,0 +1,111 @@
+---
+title: "Branching"
+slug: branching
+description: "Compare approaches and rewind mistakes without losing either, using Pi's session tree."
+order: 12
+quiz: true
+agentInstructions: |
+  Cover these four topics:
+
+  1. Why branching is worth learning: it lets you compare two approaches
+     to the same problem without losing either one, and rewind to before
+     a bad response without starting a whole new session. Sessions are
+     stored as trees (id/parentId per entry), and /tree lets you jump to
+     any earlier point and continue from there without creating a new
+     file.
+
+  2. Tree navigation: /tree opens the tree view. Arrow keys navigate and
+     page through entries, Ctrl+Left/Right or Alt+Left/Right fold/unfold
+     or jump between branch segments, Shift+L labels an entry, Ctrl+O
+     cycles the filter mode (default, no-tools, user-only, labeled-only,
+     all).
+
+  3. The selection behavior subtlety: selecting a user or custom message
+     moves the leaf to that message's parent and puts its text back in
+     the editor for edit-and-resubmit, creating a new branch. Selecting
+     an assistant, tool, compaction, or other non-user entry moves the
+     leaf there directly with an empty editor, for jump-and-continue.
+     This distinction is easy to miss and worth calling out explicitly.
+
+  4. Branch summaries: when /tree switches away from one branch to
+     another, Pi offers to summarize the abandoned branch and attach it
+     at the new position, so context from the path you left isn't fully
+     lost. Also cover the /tree vs /fork vs /clone distinction: /tree
+     stays in the same session file and shows the full tree; /fork starts
+     a new session file from a previous user message via a selector;
+     /clone duplicates the current active branch into a new session file.
+
+  After teaching and quizzing, verify completion with the hands-on
+  exercise: have the student ask Pi to do a small task one way, use
+  /tree to jump back to before that response, ask for a different
+  approach, then use /tree again to compare both branches. Confirm they
+  can describe both branches side by side before marking complete.
+---
+
+import AgentPrompt from '../../components/AgentPrompt.astro'
+
+A session isn't just a straight line of messages — it's a tree. Every response you get is a branch point, and Pi keeps every path you've explored, not just the one you're currently on.
+
+<AgentPrompt title="Branching" />
+
+## Why bother
+
+Two situations come up constantly:
+
+- **Comparing approaches.** You ask Pi to solve something one way, then wonder if a different approach would be better — without throwing away the first attempt.
+- **Rewinding a mistake.** Pi goes down the wrong path, and you want to go back to right before that happened, without starting an entirely new session and losing everything that came before it.
+
+Both are the same underlying feature: every entry in a session has an `id` and a `parentId`, and the current position is just the active leaf of that tree. Jumping to any earlier point doesn't create a new file or lose anything — it just moves where you're standing.
+
+```text
+├─ user: "Hello, can you help..."
+│  └─ assistant: "Of course! I can..."
+│     ├─ user: "Let's try approach A..."
+│     │  └─ assistant: "For approach A..."
+│     │     └─ user: "That worked..."  ← active
+│     └─ user: "Actually, approach B..."
+│        └─ assistant: "For approach B..."
+```
+
+## Navigating with /tree
+
+Type `/tree` to open the tree view.
+
+| Key | Action |
+|---|---|
+| `↑`/`↓` | Navigate visible entries |
+| `←`/`→` | Page up/down |
+| `Ctrl+←`/`Ctrl+→` or `Alt+←`/`Alt+→` | Fold/unfold, or jump between branch segments |
+| `Shift+L` | Set or clear a label on the selected entry |
+| `Ctrl+O` | Cycle filter mode |
+
+Filter modes are: default, no-tools, user-only, labeled-only, and all — handy for cutting through a long tree to find the branch point you actually want.
+
+## A subtlety worth knowing
+
+What happens when you select an entry depends on what kind of entry it is:
+
+- **Selecting a user (or custom) message** moves the leaf to that message's *parent*, and puts the message's original text back in the editor. You can edit it and resubmit — this creates a new branch from that point.
+- **Selecting an assistant, tool, compaction, or other non-user entry** moves the leaf there directly, with an empty editor. You just continue from that point — no new branch, no text to edit.
+
+In short: pick a user message to change what was asked; pick anything else to jump ahead and keep going.
+
+## Branch summaries
+
+When you use `/tree` to switch away from one branch to another, Pi offers to summarize the branch you're leaving and attach that summary at your new position. This keeps useful context from the abandoned path without replaying the whole thing. You'll be asked to choose: no summary, a default summary, or a summary with custom focus instructions.
+
+## /tree vs. /fork vs. /clone
+
+Three related commands, three different outputs:
+
+| | `/tree` | `/fork` | `/clone` |
+|---|---|---|---|
+| Output | Same session file | New session file | New session file |
+| View | Full tree | User-message selector | Current active branch |
+| Typical use | Explore alternatives in place | Start a new session from an earlier prompt | Duplicate current work before continuing |
+
+Use `/tree` when you want to keep every alternative together in one place. Reach for `/fork` or `/clone` when you'd rather split off into a completely separate session file.
+
+## Exercise: compare two approaches
+
+<AgentPrompt title="Branching" prompt={"Let's practice branching. First, ask me for a small coding or writing task and do it one way. Then use /tree to jump back to right before that response. Ask me to redo it a different way. Then use /tree again and help me compare both branches side by side."} />
