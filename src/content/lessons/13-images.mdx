@@ -1,0 +1,107 @@
+---
+title: "Images"
+slug: images
+description: "Share images and screenshots with Pi."
+order: 13
+quiz: true
+agentInstructions: |
+  Cover these four topics:
+
+  1. What vision capability is: some models can interpret images shared
+     in the conversation. They can describe photos, extract text from
+     screenshots, and read UI details including layout, spacing,
+     typography, and color.
+
+  2. How to add images in Pi: paste with Ctrl+V (Alt+V on Windows), drag
+     an image into a terminal that supports it, or type @ to fuzzy-search
+     and reference a file (including images) by path. From the CLI,
+     `pi @screenshot.png "What's in this image?"` attaches a file
+     directly to a one-off prompt.
+
+  3. The images.autoResize (default true, resizes to 2000x2000 max) and
+     images.blockImages (default false, blocks all images from being
+     sent to the LLM entirely) settings, in ~/.pi/agent/settings.json or
+     a project's .pi/settings.json.
+
+  4. Which models support vision, based on verified free-tier options
+     rather than a specific subscription product: OpenAI's Codex model
+     (the /login ChatGPT Plus/Pro path from Installation) supports image
+     input. On the free OpenRouter path, specific :free-tagged models
+     support vision too — check openrouter.ai/models for current
+     :free models with image input, since the exact list changes over
+     time. If a model doesn't acknowledge an image, that's a sign to
+     switch to a vision-capable one.
+
+  After teaching and quizzing, verify completion by confirming the
+  student has pasted, dragged, or @-referenced an image and received a
+  response that references its contents.
+---
+
+import AgentPrompt from '../../components/AgentPrompt.astro'
+
+One of the most effective ways to give Pi useful context is to share an image. A picture really is worth a thousand words — instead of describing a design you like or a bug you're seeing, you can just show it.
+
+This only works if the model you're using has **vision** capability. Vision models can look at an image and understand what's in it: they can describe photographs, extract text from screenshots, and interpret UI details like layout, spacing, typography, and color.
+
+<AgentPrompt title="Images" />
+
+## How to add an image
+
+Pi supports a few ways to bring an image into a conversation:
+
+- **Paste** — copy an image to your clipboard and press `Ctrl+V` (`Alt+V` on Windows).
+- **Drag and drop** — drag an image file into a terminal that supports it.
+- **`@` file reference** — type `@` and fuzzy-search for a file by name, including images.
+- **CLI argument** — attach a file directly when starting a one-off prompt: `pi @screenshot.png "What's in this image?"`
+
+Whichever method you use, the image becomes part of your message just like text — you can combine an image and a prompt in the same message.
+
+## Image settings
+
+Two settings control how Pi handles images, in `~/.pi/agent/settings.json` or a project's `.pi/settings.json`:
+
+```json
+{
+  "images": {
+    "autoResize": true,
+    "blockImages": false
+  }
+}
+```
+
+| Setting | Default | What it does |
+|---|---|---|
+| `autoResize` | `true` | Resizes images down to a 2000×2000 max before sending. |
+| `blockImages` | `false` | Blocks all images from being sent to the model entirely — useful if you're working somewhere images shouldn't leave the machine. |
+
+## Which models support vision
+
+Not all models can interpret images, and vision support isn't tied to a specific subscription product the way it might be with other tools — it depends on which model you're actually using:
+
+- **OpenAI's Codex model** (the `/login` ChatGPT Plus/Pro path from Installation) supports image input.
+- **Free OpenRouter models** — some `:free`-tagged models support vision too, though the specific list changes over time as providers add and remove models. Check [openrouter.ai/models](https://openrouter.ai/models) and filter for models tagged `:free` with image input support.
+
+If a model doesn't acknowledge your image or seems to ignore it, that's a sign to switch to a confirmed vision-capable model.
+
+## What vision is useful for
+
+Here are some concrete ways images help:
+
+**Replicate a design** — share a screenshot of a UI you admire and ask Pi to recreate it. The model can read the layout, colors, spacing, and typography from the image.
+
+**Debug a visual bug** — share a screenshot of something that looks wrong. The model can see what you're seeing and help diagnose it without you having to describe every detail.
+
+**Implement a mockup** — share a wireframe or design file export and ask Pi to build it. This is often faster and more accurate than trying to describe the design in words.
+
+**Extract text from an image** — share a screenshot containing text (a menu, a dialog, an error message) and the model can read it for you.
+
+## Try it
+
+Make sure you're using a vision-capable model, then try one of these:
+
+- Take a screenshot of any webpage or app and ask: *What do you see in this image?*
+- Share a screenshot of a UI and ask: *How would you describe the design of this interface?*
+
+If the model responds with details from the image, vision is working.
+
+<AgentPrompt title="Images" prompt={`I've shared an image with Pi and gotten a response describing it. Let's verify the Images lesson is complete.`} />
