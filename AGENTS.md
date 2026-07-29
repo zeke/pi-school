@@ -210,7 +210,15 @@ Pi before Pi is installed, so that lesson has none.
   agentInstructions as JSON (no exercise MDX files exist yet, so these
   currently return an empty list / 404s)
 - `GET /api/openapi.json` — OpenAPI 3.1 spec for the full API surface,
-  linked from `/llms.txt`
+  linked from `/llms.txt`. `src/pages/api/openapi.json.test.ts` validates it
+  with `@apidevtools/swagger-parser` (structural OpenAPI 3.1 conformance +
+  `$ref` resolution) and cross-checks it against the actual route files
+  (documented paths/methods must match what's exported from
+  `src/pages/api/**`, and `StudentProfile` enum options must match the
+  `profile/[studentId].ts` validation lists) so the spec can't silently
+  drift from the implementation. `package.json` pins a `fast-uri` override
+  since swagger-parser's `ajv` dependency pulled in a version with a known
+  advisory (GHSA-v2hh-gcrm-f6hx).
 - `GET /llms.txt` — plain-text agent discovery document, points agents at
   `/api/openapi.json` for endpoint details rather than describing them
   inline
