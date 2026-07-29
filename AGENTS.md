@@ -4,7 +4,8 @@ A free, self-paced course for learning [Pi](https://pi.dev), the minimal
 agent harness. Modeled on
 [opencode.school](https://github.com/opencodeschool/opencode.school).
 
-See [plan.md](plan.md) for the full lesson-by-lesson mapping, research
+See [README.md](README.md) for a human-facing overview and
+[plan.md](plan.md) for the full lesson-by-lesson mapping, research
 findings, and decisions made during planning. This file covers the
 technical reference for the actual codebase.
 
