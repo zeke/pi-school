@@ -27,7 +27,11 @@
     "rehype-autolink-headings": "^7.0.0",
     "rehype-slug": "^6.0.0"
   },
+  "overrides": {
+    "fast-uri": "^3.1.4"
+  },
   "devDependencies": {
+    "@apidevtools/swagger-parser": "^12.1.0",
     "@astrojs/check": "^0.9.9",
     "@biomejs/biome": "^2.5.0",
     "@cloudflare/workers-types": "^5.20260701.0",

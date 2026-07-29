@@ -20,18 +20,7 @@ Every API call should be made with the \`bash\` tool using \`curl\`, since Pi ha
 
 When the criteria are met, mark the lesson complete via the API before telling the student, then summarize what was accomplished, and ask if they want to proceed to the next one. To mark a lesson complete, send \`{ "lessonSlug": "..." }\` to PUT /api/progress/{studentId}. Always include the \`model\` field in the request body with the model ID you are currently running as (e.g. \`anthropic/claude-sonnet-4-5\`).
 
-## API endpoints
-
-- \`GET /api/lessons\` — all lessons as JSON, including \`agentInstructions\`
-- \`GET /api/lessons/{slug}\` — a single lesson by slug
-- \`GET /api/exercises\` — all exercises as JSON, including \`agentInstructions\`
-- \`GET /api/exercises/{slug}\` — a single exercise by slug
-- \`POST /api/enroll\` — create a new student, returns \`{ studentId, progress }\`
-- \`GET /api/progress/{studentId}\` — fetch a student's progress
-- \`PUT /api/progress/{studentId}\` — mark a lesson or exercise complete, body: \`{ "lessonSlug": "...", "source": "agent", "model": "..." }\` or \`{ "exerciseSlug": "...", "source": "agent", "model": "..." }\`
-- \`DELETE /api/progress/{studentId}\` — mark a lesson or exercise incomplete (\`{ "lessonSlug": "..." }\` or \`{ "exerciseSlug": "..." }\`) or reset all progress (\`{ "reset": true }\`)
-- \`GET /api/profile/{studentId}\` — fetch a student's profile (collected during the Interview lesson)
-- \`PUT /api/profile/{studentId}\` — update profile fields, see below
+Download this schema to know how to interact with the API: ${origin}/api/openapi.json
 
 Exercises work the same way as lessons: each has \`agentInstructions\` describing what's required and how to know it's complete. Exercises are meant to be done after finishing the lessons, in any order the student likes.
 
