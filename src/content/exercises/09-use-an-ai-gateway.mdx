@@ -1,0 +1,116 @@
+---
+title: "Use an AI gateway"
+slug: use-an-ai-gateway
+description: "Route AI requests through Cloudflare's AI Gateway with Unified Billing."
+order: 9
+agentInstructions: |
+  Guide the student through setting up Cloudflare AI Gateway for Pi.
+  Adapt depth and pace to their profile.
+
+  Steps:
+
+  1. Check prerequisites: Node.js installed (`node --version`), Cloudflare
+     account authenticated (`npx wrangler whoami`). If not authenticated,
+     run `npx wrangler login`. If they don't have a Cloudflare account,
+     help them sign up at https://dash.cloudflare.com/sign-up.
+
+  2. Create an AI Gateway in the Cloudflare dashboard: navigate to AI >
+     AI Gateway > Create custom gateway. Name it "pi". Enable
+     authentication and logging.
+
+     Note: if the student already has a gateway (e.g. from a previous
+     attempt), they can reuse it. The dashboard will show existing
+     gateways instead of the Create button.
+
+  3. Load credits for Unified Billing: on the main AI Gateway page (the
+     gateway list page), find the Credits Available card (top right),
+     click Manage > Top-up credits, and load at least $5. Unified
+     Billing is enabled automatically once credits are loaded — there
+     is no separate Settings toggle. Explain that Unified Billing
+     lets the gateway pay providers (Anthropic, OpenAI, etc.) on their
+     behalf — no separate API keys needed for each provider.
+
+  4. Create a gateway authentication token: on the main AI Gateway page
+     (or inside the gateway's Authentication tab), click
+     Create authentication token. Copy the token (it starts with
+     cfut_). This token is different from a regular Cloudflare API
+     token — it authenticates requests to the gateway specifically.
+
+  5. Set environment variables. The student needs CLOUDFLARE_ACCOUNT_ID
+     and CLOUDFLARE_GATEWAY_ID ("pi") in their shell profile
+     (~/.zshrc or ~/.bashrc). They can find their account ID by running
+     `npx wrangler whoami` or in the Cloudflare dashboard URL.
+
+  6. Store the gateway token: run `/login` in Pi and select Cloudflare AI
+     Gateway, then paste the cfut_ token when prompted. This stores
+     CLOUDFLARE_API_KEY for the provider in ~/.pi/agent/auth.json.
+
+     Important: if CLOUDFLARE_API_KEY is already set as a plain
+     environment variable (e.g. for other Cloudflare tools), Pi will use
+     that value instead of the one stored by /login. The student should
+     either unset it, rename it (e.g. to CLOUDFLARE_API_KEY_GENERAL), or
+     set it to the cfut_ gateway token instead. Wrangler doesn't need
+     that variable at all if the student ran `wrangler login` — it has
+     its own OAuth session.
+
+  7. Try it from the command line first to confirm the gateway works:
+     `pi --provider cloudflare-ai-gateway --model "claude-sonnet-4-5"`.
+     Then try an OpenAI model through the same gateway:
+     `pi --provider cloudflare-ai-gateway --model "gpt-5.1"`.
+
+  8. Optionally, make one of these the default for future sessions by
+     setting defaultProvider and defaultModel in
+     ~/.pi/agent/settings.json (see the Configuration lesson), e.g.
+     `{ "defaultProvider": "cloudflare-ai-gateway", "defaultModel":
+     "claude-sonnet-4-5" }`.
+
+  9. Test: after connecting, send a message with each of the two models,
+     confirm a response comes back from each, then check the gateway's
+     Logs tab in the Cloudflare dashboard to verify both requests were
+     logged.
+
+  Verify completion by confirming the student can chat through at least
+  two different provider models via the gateway and see the requests
+  logged in the Cloudflare dashboard.
+---
+
+import AgentPrompt from '../../components/AgentPrompt.astro'
+
+When you use an AI model in Pi, your request goes directly to the model provider: Anthropic, OpenAI, Google, or whoever hosts the model. That means a separate account, a separate API key, and a separate bill for each provider. An AI gateway sits between Pi and the providers, giving you a single point of control: one bill, one set of logs, one place to manage access.
+
+In this exercise, you'll set up [Cloudflare AI Gateway](https://developers.cloudflare.com/ai-gateway/) and connect it to Pi. With [Unified Billing](https://developers.cloudflare.com/ai-gateway/features/unified-billing/), you load credits into your Cloudflare account and use models from Anthropic, OpenAI, and Workers AI without needing their API keys. Cloudflare handles the provider payments.
+
+<AgentPrompt title="Use an AI gateway" prompt={`Let's work on the "Use an AI gateway" exercise together!`} />
+
+## Why use a gateway?
+
+Without a gateway, every provider is a separate relationship: sign up, get an API key, manage billing, check usage. With a gateway:
+
+- **One bill** — load credits once, use models from any supported provider
+- **Logging** — every request and response is logged in one place, useful for debugging and understanding usage
+- **Provider switching** — try different models without creating new accounts or managing new API keys
+- **Caching** — repeated identical requests can be served from cache, saving money and reducing latency
+
+This is a different pattern from the free OpenRouter `:free` models covered in the Models lesson — those are genuinely free, no-account models for learning and experimenting. A gateway is for when you want production-grade access to paid flagship models (Claude, GPT) without juggling a separate account and API key per provider. In this exercise, you'll set up your own gateway with Cloudflare, giving you direct control over which providers you use, how much you spend, and what gets logged.
+
+## Prerequisites
+
+You'll need a free [Cloudflare account](https://dash.cloudflare.com/sign-up) and [Node.js](https://nodejs.org) installed (for the `wrangler` CLI). If you completed the [Build a website](/exercises/build-a-website) exercise, you already have both.
+
+You'll also load at least $5 in credits into the gateway for Unified Billing. This is real money, but $5 goes a long way: a typical Claude Sonnet conversation costs a few cents.
+
+## What you'll do
+
+- **Create a gateway** in the Cloudflare dashboard with authentication and logging enabled
+- **Load credits** so Cloudflare handles payments to Anthropic, OpenAI, and other providers on your behalf via Unified Billing
+- **Store the gateway token** with `/login` so Pi can authenticate with the gateway
+- **Try models** from at least two different providers through the gateway (e.g. Claude Sonnet and a GPT model)
+- **Test it** by chatting through the gateway and checking the logs in the Cloudflare dashboard
+
+## A note on environment variables
+
+The gateway uses a token (starting with `cfut_`) that's different from a regular Cloudflare API token. If you already have `CLOUDFLARE_API_KEY` set as a plain environment variable for other Cloudflare tools, Pi will use that instead of the token you stored with `/login`. Pi will help you sort this out during setup. Wrangler itself doesn't need that environment variable if you've run `wrangler login` — it has its own OAuth session.
+
+## Automate the dashboard setup
+
+The gateway setup involves several clicks in the Cloudflare dashboard: creating the gateway, enabling authentication, loading credits, generating a token. If you completed the [Drive a browser](/exercises/drive-a-browser) exercise and have the Faster Chrome DevTools skill installed, you can let the agent do the clicking for you. Describe what you want and let it drive the dashboard.

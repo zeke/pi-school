@@ -1,0 +1,104 @@
+---
+title: "Drive a browser"
+slug: drive-a-browser
+description: "Automate your real browser using the Faster Chrome DevTools skill."
+order: 5
+agentInstructions: |
+  Guide the student through installing and using the Faster Chrome
+  DevTools skill to automate their real browser from Pi. Adapt depth to
+  their profile.
+
+  This exercise requires the skill. If the student doesn't have it
+  installed (check ~/.pi/agent/skills/faster-chrome-devtools-skill/ or
+  ~/.agents/skills/faster-chrome-devtools-skill/ for a SKILL.md file),
+  install it with `npx skills add zeke/faster-chrome-devtools-skill
+  --global --all --yes`, then run /reload.
+
+  Steps:
+
+  1. Enable remote debugging in Chrome. Have the student navigate to
+     chrome://inspect/#remote-debugging in Chrome and enable the remote
+     debugging feature. Chrome may also show an "Allow debugging" prompt
+     — the student should accept it.
+
+  2. Explain the skill's approach before using it: it connects directly
+     to Chrome's DevTools Protocol via a dependency-free CLI script, with
+     no MCP server, Puppeteer, or Playwright involved. This is Pi's
+     answer to what other agent tools solve with a Chrome DevTools MCP
+     server — Pi has no built-in MCP client (see the Tools lesson), and
+     this skill sidesteps that gap entirely rather than needing one.
+
+  3. Start with something simple: list open tabs, then take a screenshot
+     of whatever tab the student has open. This verifies the connection
+     works. Prefer a snapshot (accessibility tree) over a screenshot when
+     the goal is to read or interact with the page — screenshots are for
+     when visual appearance actually matters.
+
+  4. Try a real task: navigate to a page, read its content, and summarize
+     it, or click through a small interaction (open a menu, fill a
+     field). Confirm state changes with the skill's wait-for behavior
+     rather than guessing when a page has finished loading.
+
+  5. Ask the student what they want to automate. Give them ideas: extract
+     data from a page they're logged into, fill out a form, navigate
+     through a multi-step workflow, compare information across tabs,
+     summarize a long article, check a portal that has no API. The key
+     insight is that the skill can drive their existing logged-in Chrome,
+     so they're already logged in everywhere, and sites that were never
+     designed for automation become automatable. Help them accomplish
+     whatever they want to try.
+
+  6. Mention, without going deep, that the same skill can also launch a
+     clean anonymous Chrome profile with no logins (for a fresh session)
+     or connect to a remote browser over Cloudflare Browser Run (for
+     cloud/CI use) — useful context, not required for this exercise.
+
+  7. After completing at least one meaningful browser automation task,
+     discuss what went well and what the limitations are.
+
+  Verify completion by confirming the student has successfully used the
+  skill to perform at least one browser automation task (screenshot,
+  snapshot and summary, form interaction, data extraction, etc.).
+---
+
+import AgentPrompt from '../../components/AgentPrompt.astro'
+
+Most browser automation tools require a headless browser, separate logins, and a lot of code. In this exercise, your agent drives your real browser — the one you use every day, with all your tabs open and all your accounts logged in.
+
+Pi has no built-in MCP client (covered in the Tools lesson), so this doesn't go through a Chrome DevTools MCP server the way it might in some other tools. Instead, you'll use the [Faster Chrome DevTools skill](https://github.com/zeke/faster-chrome-devtools-skill) — a dependency-free command-line tool that talks to Chrome's DevTools Protocol directly. No MCP server, no Puppeteer, no Playwright.
+
+<AgentPrompt title="Drive a browser" prompt={`Let's work on the "Drive a browser" exercise together!`} />
+
+## Install the skill
+
+```
+npx skills add zeke/faster-chrome-devtools-skill --global --all --yes
+```
+
+Then run `/reload` so Pi picks it up.
+
+## Enable remote debugging in Chrome
+
+Navigate to this URL in Chrome and enable it:
+
+```
+chrome://inspect/#remote-debugging
+```
+
+Chrome shows a permission prompt the first time the skill connects, so nothing happens silently.
+
+## The killer feature: your existing session
+
+The reason this is powerful is that the skill drives your existing Chrome session. You're already logged in everywhere. That opens up sites that were never designed to be automated — sites with no API, no CLI, and a complex authenticated UI:
+
+- Extract information from a page behind a login
+- Summarize a paywalled article you subscribe to
+- Fill out a long form with your agent walking you through it
+- Compare details across multiple open tabs
+- Check a portal or dashboard that has no API
+
+## What you'll do
+
+You'll start simple — list your open tabs and take a screenshot to verify the connection works. Then try reading a page's content and summarizing it. After that, the exercise is open-ended: pick something you actually want to automate and do it.
+
+If you ever need a clean session instead of your logged-in browser, the same skill can launch an anonymous local Chrome profile with no logins, or connect to a remote browser over Cloudflare Browser Run — worth knowing about, even if you don't need it for this exercise.
