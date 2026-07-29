@@ -1,0 +1,127 @@
+---
+title: "Tools"
+slug: tools
+description: "Understand Pi's built-in tools, and connect external ones without an MCP client built in."
+order: 9
+quiz: true
+agentInstructions: |
+  Cover these four topics:
+
+  1. What tools are: functions an AI can call to do things beyond
+     generating text — sometimes called "function calling" or "tool
+     use". This is what makes Pi an agent rather than a chatbot.
+
+  2. Pi's built-in tools: read, bash, edit, write, grep, find, ls. These
+     are always available and cover file access and shell commands
+     without any extra setup.
+
+  3. Pi has no built-in MCP (Model Context Protocol) client, unlike some
+     other agent tools. This is a deliberate design choice, not a gap
+     that was never addressed: MCP tool definitions are verbose, and a
+     single MCP server can register 10k+ tokens of tool descriptions
+     into every session's context whether or not those tools get used.
+     Pi keeps its core small and pushes workflow-specific behavior
+     (including MCP) into extensions and packages instead.
+
+  4. The community pi-mcp-adapter package restores MCP access without
+     the context cost: install with `pi install npm:pi-mcp-adapter`,
+     restart, then run `/mcp setup` for guided first-run setup. It
+     exposes MCP tools through a single proxy tool (~200 tokens) instead
+     of registering every tool from every server up front — the agent
+     discovers and calls MCP tools on demand via the proxy, and servers
+     only start when actually used.
+
+  After teaching and quizzing, walk the student through installing
+  pi-mcp-adapter and connecting the free Open-Meteo weather MCP server
+  (see the lesson body for the exact config). Verify completion by
+  confirming the student's project or global mcp.json file contains an
+  open-meteo entry, then have them ask Pi a weather question and confirm
+  it makes a tool call rather than answering from training data.
+
+  Tell the student pi-mcp-adapter requires a restart of Pi after
+  installation to register the extension, but /mcp setup and connecting
+  new servers afterward do not require another restart.
+---
+
+import AgentPrompt from '../../components/AgentPrompt.astro'
+
+When you type a message to an AI, it generates text. That's it — on its own, it can only produce words. But words aren't always enough. Sometimes you need the AI to actually *do* something: read a file, run a command, or look up live data.
+
+That's what tools are for. A tool is a function the AI can call when it decides one is needed — it recognizes the situation, picks the right tool, runs it, and uses the result to give you a better answer. This is sometimes called "function calling" or "tool use."
+
+<AgentPrompt title="Tools" />
+
+## Pi's built-in tools
+
+Pi ships with seven built-in tools, always available with no setup:
+
+| Tool | What it does |
+|---|---|
+| `read` | Read a file |
+| `write` | Create or overwrite a file |
+| `edit` | Make precise changes to a file |
+| `bash` | Run a shell command |
+| `grep` | Search file contents |
+| `find` | Find files by name/pattern |
+| `ls` | List directory contents |
+
+That's enough for most coding and file-management tasks. For anything else — searching the web, querying a database, controlling a browser — you need to extend Pi.
+
+## Why Pi has no built-in MCP
+
+If you've used other AI coding tools, you may expect a built-in way to connect **MCP** (Model Context Protocol) servers — small programs that expose extra tools to an AI, like searching a calendar or fetching live data. Pi deliberately doesn't ship one.
+
+The reasoning: MCP tool definitions are verbose. A single MCP server can register 10,000+ tokens of tool descriptions into your context window, and you pay that cost every session whether you use those tools or not. Connect a few servers the usual way and you've burned a meaningful chunk of your context before the conversation even starts. Pi keeps its core small on purpose and pushes workflow-specific behavior like this into extensions and packages instead of baking it in.
+
+## Getting MCP access anyway: pi-mcp-adapter
+
+The community [`pi-mcp-adapter`](https://github.com/nicobailon/pi-mcp-adapter) package solves the context problem directly: instead of registering every tool from every connected server, it exposes one proxy tool (about 200 tokens) that the agent uses to search for, describe, and call MCP tools on demand. Servers stay disconnected until you actually use one of their tools.
+
+Install it:
+
+```bash
+pi install npm:pi-mcp-adapter
+```
+
+**Restart Pi** after installing — extensions load at startup.
+
+Once it's running, use `/mcp setup` for guided first-run setup. It scans for existing MCP configs (including ones from other tools like Cursor, Claude Code, or Codex), lets you pick which to import, and previews the exact file changes before writing anything.
+
+## Add a weather MCP server
+
+Let's connect a local MCP server that fetches live weather data from [Open-Meteo](https://open-meteo.com) — a free, public weather API with no account or API key required.
+
+Ask Pi to add the following to `.mcp.json` in your project (pi-mcp-adapter's preferred project-local config file):
+
+```json
+{
+  "mcpServers": {
+    "open-meteo": {
+      "command": "npx",
+      "args": ["-y", "-p", "open-meteo-mcp-server", "open-meteo-mcp-server"]
+    }
+  }
+}
+```
+
+This tells the adapter to start the `open-meteo-mcp-server` package via `npx` when its tools are actually needed. **This requires Node.js.** If you don't have it installed, ask Pi to help you install it for your operating system.
+
+## Check the connection
+
+Run `/mcp` to see a status panel of your configured servers. This doesn't require another restart — connecting or reconnecting servers works while Pi is running. Use `/mcp reconnect open-meteo` if you want to force a fresh connection.
+
+<AgentPrompt title="Tools" prompt={`I've installed pi-mcp-adapter, restarted Pi, and connected the Open-Meteo server. Let's verify the Tools lesson is complete.`} />
+
+## Try it
+
+Once it's connected, ask Pi something like:
+
+> What's the weather forecast for Tokyo this week?
+
+Watch as Pi searches for a matching tool through the proxy, calls it, and uses the result in its answer. That's the AI deciding a tool is needed, calling it, and working with what comes back — this is what distinguishes an agent from a chatbot.
+
+If Pi doesn't reach for the weather server on its own, nudge it by name: "use the open-meteo MCP server to check the weather in Tokyo."
+
+## Find more MCP servers
+
+Ask Pi to find and set up an MCP server for something you need — describe the task and it can search for a relevant server and add it to your config. For the full command reference, including OAuth-authenticated servers and multi-server setups, see the [pi-mcp-adapter README](https://github.com/nicobailon/pi-mcp-adapter).
