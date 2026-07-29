@@ -1,0 +1,147 @@
+---
+title: "Cheatsheet"
+slug: cheatsheet
+description: "Slash commands, prompt syntax, keyboard shortcuts, CLI flags, and file paths at a glance."
+---
+
+A quick reference drawn from [Pi's own docs](https://pi.dev/docs/latest) and the lessons in this course.
+
+For deeper context on any item, follow the links to the relevant lesson or to the official docs.
+
+## Slash commands
+
+Type these inside Pi's prompt. Type `/` on its own to see the full list of available commands, including any [prompt templates](/glossary#prompt-template) and [skills](/lessons/skills) you've installed.
+
+| Command | What it does |
+| --- | --- |
+| `/login`, `/logout` | Manage OAuth or API-key credentials for a [model](/lessons/models) provider |
+| `/model` | Switch models |
+| `/scoped-models` | Enable/disable models for `Ctrl+P` cycling |
+| `/settings` | Thinking level, theme, message delivery, transport |
+| `/resume` | Pick from previous [sessions](/lessons/sessions) |
+| `/new` | Start a new session |
+| `/name <name>` | Set the current session's display name |
+| `/session` | Show session file, ID, messages, tokens, and cost |
+| `/tree` | Jump to any point in the session and continue from there — see [Branching](/lessons/branching) |
+| `/trust` | Save a [project trust](/lessons/trust) decision for future sessions |
+| `/fork` | Create a new session from a previous user message |
+| `/clone` | Duplicate the current active branch into a new session |
+| `/compact [prompt]` | Manually compact context, optionally with custom instructions |
+| `/copy` | Copy the last assistant message to the clipboard |
+| `/export [file]` | Export the session to HTML or JSONL |
+| `/import <file>` | Import and resume a session from a JSONL file |
+| `/share` | Upload the session as a private GitHub gist with a shareable HTML link |
+| `/reload` | Reload keybindings, [extensions](/lessons/extensions), skills, prompt templates, themes, and context files |
+| `/hotkeys` | Show all keyboard shortcuts |
+| `/changelog` | Display version history |
+| `/quit` | Quit Pi |
+| `/skill:name` | Manually invoke an installed [skill](/lessons/skills) |
+| `/<template-name>` | Run a [prompt template](/lessons/prompt-templates) you've defined |
+
+## Prompt syntax
+
+Special characters that change how a prompt is interpreted.
+
+| Syntax | What it does |
+| --- | --- |
+| `@<path>` | Fuzzy-search and reference a project file; its contents are added to the conversation (e.g. `Explain @src/index.ts`) |
+| `!<command>` | Run a shell command and send its output to the model as part of the conversation |
+| `!!<command>` | Run a shell command without sending its output to the model |
+
+## Keyboard shortcuts
+
+The full set is customizable via `~/.pi/agent/keybindings.json` — these are the defaults. Run `/hotkeys` inside Pi any time for the live list.
+
+### Images and files
+
+| Shortcut | What it does |
+| --- | --- |
+| `Ctrl+V` (`Alt+V` on Windows) | Paste an [image](/lessons/images) from the clipboard |
+| Drag and drop | Drag an image file into a terminal that supports it |
+| `Tab` | Complete a file path |
+| `Ctrl+G` | Open the current input in an external editor |
+
+### Models and thinking
+
+| Shortcut | What it does |
+| --- | --- |
+| `Ctrl+L` | Open the [model](/lessons/models) selector |
+| `Ctrl+P` / `Shift+Ctrl+P` | Cycle forward/backward through scoped models |
+| `Shift+Tab` | Cycle thinking level |
+| `Ctrl+T` | Collapse or expand thinking blocks |
+
+### Sessions and tree
+
+| Shortcut | What it does |
+| --- | --- |
+| `Ctrl+X` | Copy the last assistant message, or the selected message in `/tree` |
+| `Ctrl+O` (in tree view) | Cycle the tree filter mode |
+| `Shift+L` (in tree view) | Set or clear a label on the selected entry |
+| `Ctrl+R` (in session picker) | Rename a session |
+| `Ctrl+D` (in session picker) | Delete a session |
+
+### Application
+
+| Shortcut | What it does |
+| --- | --- |
+| `Escape` | Cancel or abort the current response |
+| `Ctrl+C` | Clear the editor |
+| `Ctrl+D` | Exit Pi (when the editor is empty) |
+| `Ctrl+Z` | Suspend Pi to the background (not on native Windows) |
+
+## CLI flags
+
+Pass these when starting `pi` from your terminal. For the full list, see the [usage docs](https://pi.dev/docs/latest/usage).
+
+| Flag | What it does |
+| --- | --- |
+| `-p`, `--print` | Print a single response and exit, instead of starting an interactive session |
+| `--mode json` | Output events as JSON lines |
+| `--mode rpc` | RPC mode over stdin/stdout, for process integration |
+| `-c`, `--continue` | Continue the most recent session |
+| `-r`, `--resume` | Browse and select a session at startup |
+| `--name <name>`, `-n <name>` | Set the session display name at startup |
+| `--provider <name>` | Choose a provider, e.g. `anthropic`, `openai`, `google` |
+| `--model <pattern>` | Choose a model, e.g. `sonnet:high` or `openai/gpt-4o` |
+| `--no-context-files`, `-nc` | Disable `AGENTS.md`/`CLAUDE.md` discovery |
+| `--no-builtin-tools`, `-nbt` | Disable built-in tools, keep extension/custom tools |
+| `--approve`, `-a` | Trust project-local settings for one run |
+| `--no-approve`, `-na` | Ignore project-local settings for one run |
+
+## File paths
+
+Where Pi looks for config and customization files. Global paths apply to every project; per-project paths apply only inside that project (and only load once the [project is trusted](/lessons/trust)).
+
+### Global
+
+| Path | What it is |
+| --- | --- |
+| `~/.pi/agent/settings.json` | Main [config](/lessons/configuration): default provider/model, project trust default, compaction tuning |
+| `~/.pi/agent/AGENTS.md` | Custom [instructions](/lessons/instructions) loaded at the start of every session |
+| `~/.pi/agent/extensions/` | Global [extensions](/lessons/extensions) |
+| `~/.pi/agent/skills/`, `~/.agents/skills/` | Global [skills](/lessons/skills) |
+| `~/.pi/agent/prompts/` | Global [prompt templates](/lessons/prompt-templates) |
+| `~/.pi/agent/themes/` | Global themes |
+| `~/.pi/agent/models.json` | Custom model/provider definitions |
+| `~/.pi/agent/keybindings.json` | Custom keyboard shortcuts |
+| `~/.pi/agent/trust.json` | Saved [project trust](/lessons/trust) decisions |
+| `~/.pi/agent/sessions/` | Saved [sessions](/lessons/sessions), as JSONL |
+| `~/.pi/agent/auth.json` | Stored OAuth tokens and API keys from `/login` |
+
+### Per-project
+
+| Path | What it is |
+| --- | --- |
+| `AGENTS.md` (or `CLAUDE.md`) | Project-specific instructions, typically committed to Git |
+| `.pi/settings.json` | Project-specific config overrides |
+| `.pi/extensions/` | Project-specific extensions |
+| `.pi/skills/`, `.agents/skills/` | Project-specific skills |
+| `.pi/prompts/` | Project-specific prompt templates |
+| `.pi/themes/` | Project-specific themes |
+
+## Where to look next
+
+- [Pi's own docs](https://pi.dev/docs/latest) are the canonical reference for everything above.
+- The [keybindings docs](https://pi.dev/docs/latest/keybindings) cover every default binding and how to remap them.
+- The [usage docs](https://pi.dev/docs/latest/usage) document every CLI flag and slash command in detail.
+- The [Glossary](/glossary) defines the terms used throughout this cheatsheet and the lessons.
