@@ -1,0 +1,114 @@
+---
+title: "Extensions"
+slug: extensions
+description: "Extend Pi's own behavior with TypeScript extensions."
+order: 10
+quiz: true
+agentInstructions: |
+  Cover these four topics:
+
+  1. What extensions are: TypeScript modules Pi loads at startup that can
+     hook into events, register custom tools and commands, and change how
+     Pi itself behaves — not just what external tools it has access to.
+     Reference the Tools lesson (MCP/pi-mcp-adapter) so the student sees
+     the progression: MCP exposes external tools, extensions can modify
+     Pi's own behavior.
+
+  2. Where extensions live: ~/.pi/agent/extensions/ (global, *.ts files
+     or */index.ts subdirectories) and .pi/extensions/ (project, only
+     loaded after trust). Extensions in these auto-discovered locations
+     can be hot-reloaded with /reload.
+
+  3. What extensions can do, at a higher level than MCP: pi.on() to
+     subscribe to lifecycle events, pi.registerTool() to add custom
+     tools the LLM can call, pi.registerCommand() to add slash commands,
+     and ctx.ui.custom() for full custom TUI components with keyboard
+     input. Extensions can also maintain state across a session (stored
+     in tool result details for proper branching support).
+
+  4. Installing a real extension: pi-web-access, which fills a real gap
+     since Pi has no built-in web search or URL fetching. Install with
+     `pi install npm:pi-web-access`, run /reload, then try a web search
+     or fetch a URL.
+
+  After teaching and quizzing, verify completion by confirming
+  pi-web-access is installed (check ~/.pi/agent/settings.json or
+  ~/.pi/agent/npm/ for it) and that the student successfully ran a web
+  search or fetched a URL with it.
+
+  Mention in passing, once, that students who want Plan-mode-like
+  behavior back (separating a planning phase from execution, a feature
+  some other agent tools build in) can look at the bundled plan-mode.ts
+  example extension — Pi has no built-in modes, this is the
+  extension-based path to that behavior. Don't dwell on this, one
+  sentence is enough.
+---
+
+import AgentPrompt from '../../components/AgentPrompt.astro'
+
+In the Tools lesson, you connected an MCP server to give Pi access to an external tool. That's one way to extend Pi — but it only adds tools. What if you want to hook into Pi's own lifecycle, add a custom slash command, or change how Pi behaves rather than just what it can reach?
+
+That's what extensions are for. An extension is a TypeScript module Pi loads at startup. It can subscribe to events, register custom tools and commands, and even build its own terminal UI — this is Pi's flagship way of customizing itself.
+
+<AgentPrompt title="Extensions" />
+
+## Where extensions live
+
+- **Global** — `~/.pi/agent/extensions/`, as either a `*.ts` file or a `*/index.ts` subdirectory. Available in every project.
+- **Project** — `.pi/extensions/`, same file layout. Only loaded once the project is trusted.
+
+Extensions in these locations are hot-reloaded with `/reload` — no restart needed for changes to existing extensions, though newly *installed* extensions still need Pi to discover them at startup.
+
+## What extensions can do
+
+A minimal extension is just a function that receives an API object:
+
+```typescript
+export default function (pi) {
+  pi.on("session_start", async (event, ctx) => {
+    // React to a session starting
+  });
+
+  pi.registerCommand("hello", {
+    description: "Say hello",
+    async execute(args, ctx) {
+      ctx.ui.notify("Hello!");
+    },
+  });
+}
+```
+
+A few of the things extensions can do:
+
+- **`pi.on(event, handler)`** — subscribe to lifecycle events like a session starting, a tool being called, or the model changing.
+- **`pi.registerTool(definition)`** — register a custom tool the LLM can call, the same way built-in tools like `read` or `bash` work.
+- **`pi.registerCommand(name, options)`** — add a new `/command` that shows up alongside Pi's built-in ones.
+- **`ctx.ui.custom()`** — build a full custom TUI component with its own keyboard handling, for interactions more complex than plain text.
+
+Extensions can also hold state across a session — well-behaved ones store it in a tool result's `details` field so it reconstructs correctly if you branch the conversation (covered in the Branching lesson).
+
+Pi ships more than 60 example extensions covering patterns like these — dynamic tool registration, custom footers, session handoff, and more. Browse them for inspiration before writing your own.
+
+## Install a real extension: pi-web-access
+
+Pi has no built-in web search or URL-fetching tool. [`pi-web-access`](https://github.com/nicobailon/pi-web-access) fills that gap — it adds `web_search` and `fetch_content` tools that handle regular web pages, GitHub repos (cloned locally instead of scraped), PDFs, and YouTube videos.
+
+Install it:
+
+```bash
+pi install npm:pi-web-access
+```
+
+It works immediately with no API keys required. Run `/reload` to pick it up, then try it:
+
+> Search the web for what's new in TypeScript 5.9
+
+<AgentPrompt title="Extensions" prompt={`I've installed pi-web-access and run /reload. Let's verify the Extensions lesson is complete.`} />
+
+## A note on modes
+
+If you've used agent tools with a built-in "Plan mode" that separates planning from execution, you might look for the same thing in Pi's settings — it isn't there, since Pi has no built-in modes. The bundled `plan-mode.ts` example extension shows how to build that behavior yourself if you want it.
+
+## Find more extensions and write your own
+
+Ask Pi to build you an extension for a workflow you want to automate — describe what you want and it can scaffold one using the patterns above. For the full API reference and all bundled examples, see Pi's own [extensions documentation](https://pi.dev/docs/latest/extensions).
