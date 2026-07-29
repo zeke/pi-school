@@ -1,0 +1,140 @@
+---
+title: "Skills"
+slug: skills
+description: "Install reusable agent behaviors with Skills."
+order: 8
+quiz: true
+agentInstructions: |
+  Cover these four topics:
+
+  1. What skills are: reusable capability packages in SKILL.md files,
+     following the open agentskills.io standard. Pi implements this
+     standard directly (with some deliberate leniency, e.g. it doesn't
+     require a skill's name to match its parent directory). Supported
+     across many AI tools, so skills you install work outside Pi too.
+
+  2. How Pi uses skills: two ways, automatically when a task matches a
+     skill's description, or manually via the explicit /skill:name
+     command (e.g. /skill:pdf-tools extract).
+
+  3. What a skill can contain: at minimum a SKILL.md file with name and
+     description frontmatter plus instructions. Can also bundle scripts,
+     reference docs, templates, and other assets in the same folder.
+
+  4. Where skills live and the recommended convention: global at
+     ~/.pi/agent/skills/ or ~/.agents/skills/, project at .pi/skills/ or
+     .agents/skills/ (discovered from cwd up to the git repo root).
+     Recommend .agents/skills/ as the primary convention since it's
+     agent-agnostic and shared across tools, rather than the
+     Pi-specific .pi/skills/. Mention that Pi can also load skill
+     directories from other harnesses (e.g. ~/.claude/skills,
+     ~/.codex/skills) via the skills setting.
+
+  After teaching and quizzing, verify completion by checking that at
+  least one skill directory exists under ~/.pi/agent/skills/ or
+  ~/.agents/skills/ and contains a SKILL.md file.
+
+  Unlike some other config changes, skills don't require a restart —
+  after installing, tell the student to run /reload, then verify by
+  prompting "list installed skills".
+---
+
+import AgentPrompt from '../../components/AgentPrompt.astro'
+
+Skills are reusable capability packages that make your AI agent better at specific tasks. When you install a skill, Pi learns how to do something it didn't know before — whether that's building on a specific platform, running AI models, or following design best practices.
+
+The format was created by Anthropic and has since become an open standard maintained at [agentskills.io](https://agentskills.io). Pi implements this standard directly, so skills you install work across Pi and other tools that support the same format.
+
+<AgentPrompt title="Skills" />
+
+## How skills work
+
+A skill is a folder containing a `SKILL.md` file. At minimum that file has a `name`, a `description`, and instructions for the agent to follow. Skills can also bundle scripts, reference documentation, templates, and other assets:
+
+```
+my-skill/
+├── SKILL.md       # required: name, description, instructions
+├── scripts/       # optional: executable code
+├── references/    # optional: docs and specs
+└── assets/        # optional: templates and data
+```
+
+Pi uses skills in two ways:
+
+- **Automatically** — when your request matches a skill's description, Pi loads and applies it without you asking.
+- **Manually** — invoke a skill by name yourself with `/skill:name`, e.g. `/skill:replicate find a good image generation model`.
+
+Skills use progressive disclosure to stay efficient: at startup, Pi only loads the `name` and `description` of each skill — just enough to know when to use it. The full instructions load on demand.
+
+## Where skills live
+
+- **Global**: `~/.pi/agent/skills/` or `~/.agents/skills/`
+- **Project**: `.pi/skills/` or `.agents/skills/` (discovered from your working directory up to the git repo root, only loaded once the project is trusted)
+
+Prefer `.agents/skills/` over `.pi/skills/` for anything you'd want to reuse outside Pi — it's the agent-agnostic convention, and other tools (Claude Code, Codex) look for the same directory name.
+
+If you already have skills installed for another tool, you don't need to duplicate them. Point Pi at those directories too, in `~/.pi/agent/settings.json`:
+
+```json
+{
+  "skills": ["~/.claude/skills", "~/.codex/skills"]
+}
+```
+
+## Install with `npx skills`
+
+The best way to install skills is with the [`skills` CLI](https://www.npmjs.com/package/skills). It installs to all your AI tools at once — Pi included — from a single command.
+
+You'll need [Node.js](https://nodejs.org) installed to run `npx skills`. If you don't have it, ask Pi to help you install it for your operating system.
+
+## Install four skills
+
+Run these four commands to install a useful set of global skills:
+
+**Cloudflare** — skills for building on Workers, AI, KV, R2, D1, and the broader Cloudflare platform:
+
+```
+npx skills add https://github.com/cloudflare/skills
+```
+
+**Replicate** — skills for discovering, comparing, and running AI models via Replicate's API:
+
+```
+npx skills add replicate/skills
+```
+
+**frontend-design** — UI/UX design patterns and front-end best practices from Anthropic:
+
+```
+npx skills add https://github.com/anthropics/skills --skill frontend-design
+```
+
+**skill-creator** — create, test, and improve your own skills from any workflow you want to make repeatable:
+
+```
+npx skills add https://github.com/anthropics/skills --skill skill-creator
+```
+
+Run each command in your terminal. The CLI will detect Pi and set everything up.
+
+## Pick them up with /reload
+
+Skills don't require a restart. Run `/reload` after installing to pick up the newly added skills, then verify they loaded by prompting "list installed skills". Then use the prompt below to continue.
+
+<AgentPrompt title="Skills" prompt={`I've installed skills and run /reload. Let's verify the Skills lesson is complete.`} />
+
+## Create your own skills
+
+The `skill-creator` skill you just installed lets you turn any workflow into a reusable skill. After completing some process and wanting to make it repeatable, just tell Pi:
+
+> That worked! Let's create a global skill for it.
+
+Or if it's something specific to one project:
+
+> That worked! I don't want to have to repeat myself, so let's create a project skill for this task.
+
+## Find more skills
+
+[skills.sh](https://skills.sh) is a directory of available skill collections. Browse it to find skills for the tools and workflows you use.
+
+For the full reference — including validation rules and frontmatter options — see Pi's own [skills documentation](https://pi.dev/docs/latest/skills) and the [agentskills.io specification](https://agentskills.io/specification).
