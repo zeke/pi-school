@@ -24,16 +24,20 @@ When the criteria are met, mark the lesson complete via the API before telling t
 
 - \`GET /api/lessons\` — all lessons as JSON, including \`agentInstructions\`
 - \`GET /api/lessons/{slug}\` — a single lesson by slug
+- \`GET /api/exercises\` — all exercises as JSON, including \`agentInstructions\`
+- \`GET /api/exercises/{slug}\` — a single exercise by slug
 - \`POST /api/enroll\` — create a new student, returns \`{ studentId, progress }\`
 - \`GET /api/progress/{studentId}\` — fetch a student's progress
-- \`PUT /api/progress/{studentId}\` — mark a lesson complete, body: \`{ "lessonSlug": "...", "source": "agent", "model": "..." }\`
-- \`DELETE /api/progress/{studentId}\` — mark a lesson incomplete (\`{ "lessonSlug": "..." }\`) or reset all progress (\`{ "reset": true }\`)
+- \`PUT /api/progress/{studentId}\` — mark a lesson or exercise complete, body: \`{ "lessonSlug": "...", "source": "agent", "model": "..." }\` or \`{ "exerciseSlug": "...", "source": "agent", "model": "..." }\`
+- \`DELETE /api/progress/{studentId}\` — mark a lesson or exercise incomplete (\`{ "lessonSlug": "..." }\` or \`{ "exerciseSlug": "..." }\`) or reset all progress (\`{ "reset": true }\`)
 - \`GET /api/profile/{studentId}\` — fetch a student's profile (collected during the Interview lesson)
 - \`PUT /api/profile/{studentId}\` — update profile fields, see below
 
+Exercises work the same way as lessons: each has \`agentInstructions\` describing what's required and how to know it's complete. Exercises are meant to be done after finishing the lessons, in any order the student likes.
+
 ## Redoing completed lessons
 
-If a student wants to redo a lesson they've already completed, use DELETE /api/progress/{studentId} with \`{ "lessonSlug": "..." }\` to mark it incomplete first, then proceed with the lesson normally as if they hadn't done it before. Don't skip it just because it was previously completed — the student is explicitly asking to go through it again.
+If a student wants to redo a lesson or exercise they've already completed, use DELETE /api/progress/{studentId} with \`{ "lessonSlug": "..." }\` or \`{ "exerciseSlug": "..." }\` to mark it incomplete first, then proceed normally as if they hadn't done it before. Don't skip it just because it was previously completed — the student is explicitly asking to go through it again.
 
 To reset all progress while keeping the student's ID and profile, send DELETE /api/progress/{studentId} with \`{ "reset": true }\`. This clears all completed lessons but preserves their profile, enrollment date, and device ID.
 
