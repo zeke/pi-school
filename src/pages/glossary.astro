@@ -2,14 +2,29 @@
 // Copyright (c) 2026 Zeke Sikelianos
 // Licensed under the Apache 2.0 license found in the LICENSE file or at:
 //     https://opensource.org/licenses/Apache-2.0
+export const prerender = true;
+
+import { getEntry, render } from "astro:content";
 import Base from "../layouts/Base.astro";
 
-export const prerender = true;
+const page = await getEntry("pages", "glossary");
+if (!page) throw new Error("Missing pages/glossary content entry");
+const { Content } = await render(page);
 ---
 
-<Base title="Uglossary" description="Coming soon.">
+<Base title={page.data.title} description={page.data.description}>
+  <div class="mb-6">
+    <a href="/" class="text-sm text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+      &larr; All lessons
+    </a>
+  </div>
+
+  <header class="mb-8">
+    <h1 class="text-3xl font-bold">{page.data.title}</h1>
+    <p class="text-gray-600 dark:text-stone-400 mt-2">{page.data.description}</p>
+  </header>
+
   <article class="prose dark:prose-invert prose-stone max-w-none">
-    <h1>Uglossary</h1>
-    <p>Coming soon.</p>
+    <Content />
   </article>
 </Base>

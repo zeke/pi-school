@@ -1,0 +1,131 @@
+---
+title: "Glossary"
+slug: glossary
+description: "Definitions of common terms used in Pi School."
+---
+
+## agent
+
+An AI assistant that can read files, write code, run commands, and perform tasks on your behalf. Pi has no built-in modes (see [mode](#mode)) — it's always able to read, write, edit, and run commands once a project is trusted.
+
+## AGENTS.md
+
+A plain text file containing custom instructions that Pi reads at the start of every session. Think of it as a set of standing orders for the AI. Can exist globally (`~/.pi/agent/AGENTS.md`) or per-project (in the project root, or any parent directory Pi walks up through). The global one is personal to you; the project one is typically committed to Git and shared with your team. `CLAUDE.md` works the same way if you already use that filename.
+
+## CLI
+
+**Command-Line Interface.** A way to interact with software by typing text commands. Pi itself is invoked from the CLI (`pi`), and it also has a non-interactive print mode for one-off tasks, like `pi -p "explain this function"`. Unlike the interactive [TUI](#tui), print mode runs a single prompt and exits.
+
+## command
+
+A slash-prefixed action you can run inside Pi, like `/model` to switch AI models, `/share` to share a session, or `/compact` to summarize context. Custom ones you define yourself are called [prompt templates](#prompt-template) and run the same way, e.g. `/summarize`.
+
+## config
+
+Short for configuration. In Pi this is a settings file (`settings.json`) where you define preferences for how Pi behaves — which [model](#model) to default to, [project trust](#trust) behavior, [compaction](#context-window) tuning, and more. Settings files can be global (applying to all sessions) or per-project.
+
+## context window
+
+The amount of text a [model](#model) can "see" at once during a conversation. Measured in tokens (roughly ¾ of a word). A model with a 128K context window can work with about 128,000 tokens of combined input and output — including your messages, file contents, tool results, and the model's own responses. When a session's context window fills up, Pi triggers compaction to summarize older content and free up space. Larger context windows let the model handle bigger codebases and longer conversations without losing track of earlier details.
+
+## extension
+
+A TypeScript module Pi loads at startup that can hook into events, register custom tools and commands, and change Pi's own behavior. Extensions live globally (`~/.pi/agent/extensions/`) or per-project (`.pi/extensions/`). This is Pi's most powerful customization mechanism — broader than a [tool](#tool) or [skill](#skill) alone.
+
+## GUI
+
+**Graphical User Interface.** A visual interface with windows, buttons, and menus that you interact with using a mouse and keyboard. Pi doesn't have one — it's a terminal-only tool. Compare with [TUI](#tui) and [CLI](#cli).
+
+## Homebrew
+
+A package manager for macOS (and Linux) that lets you install software from the command line. Run `brew install <package>` to install something, `brew update` to update Homebrew itself, and `brew upgrade` to update installed packages. Not part of Pi's own install path, but useful for installing dependencies some Pi extensions and skills rely on (like `ffmpeg` or `yt-dlp`). See [brew.sh](https://brew.sh/).
+
+## LLM
+
+**Large Language Model.** A type of AI that works like a fancy version of autocomplete — it takes existing text and guesses the next likely words to follow it. Feed it the beginning of a sentence and it predicts how to continue. Feed it a question and it predicts what an answer would look like. Feed it code with a bug and it predicts what a fix would look like.
+
+LLMs are trained on vast amounts of text and code from the internet, which is how they "learn" patterns of language, reasoning, and programming. They power tools like Pi — when you type a [prompt](#prompt), it's an LLM that reads it and generates a response. Examples include Claude (by Anthropic), GPT (by OpenAI), and Gemini (by Google).
+
+For a deeper understanding of how LLMs work, watch [Intro to Large Language Models](https://www.youtube.com/watch?v=7xTGNNLPyMI) by Andrej Karpathy — a clear, non-technical explainer covering how these models are built, how to think about them, and how to get the most out of them.
+
+## LM Studio
+
+A desktop application for downloading and running [LLMs](#llm) locally on your computer. It provides a [GUI](#gui) for browsing models, managing downloads, and running a local API server that Pi can connect to as a custom [provider](#provider) via `models.json`. See [lmstudio.ai](https://lmstudio.ai/).
+
+## Markdown
+
+A plaintext format preferred by developers for writing content. Unlike formats tied to specific programs (like `.docx` for Microsoft Word or `.pages` for Apple Pages), Markdown is lightweight and not associated with any particular program, company, or technology. Files end in `.md` and use simple characters for formatting: `#` for headings, `**` for bold, `- ` for bullet lists, and `[text](url)` for links.
+
+Markdown is also the preferred text format used by [LLMs](#llm) — both for reading input and generating output. Many of the files you'll work with in Pi are Markdown, including [AGENTS.md](#agentsmd), [skills](#skill), and [prompt templates](#prompt-template).
+
+To learn the Markdown format interactively, check out [Markdown Live Preview](https://markdownlivepreview.com/).
+
+## MCP
+
+**Model Context Protocol.** An open standard for connecting AI agents to external tools and services — for example, a server that gives an agent access to a database, a browser, or an API. Pi has no built-in MCP client by design, since MCP tool definitions can burn a large chunk of a session's context window whether or not they're used. The community [pi-mcp-adapter](https://github.com/nicobailon/pi-mcp-adapter) package restores MCP access through a single lightweight proxy tool instead.
+
+## mode
+
+Some AI coding tools have built-in modes — for example, a "plan" mode that only reads and suggests versus a "build" mode that makes changes. Pi has no built-in modes; it's always able to use its full set of [tools](#tool) once a project is trusted. Students who want plan-mode-like behavior back can install or write an extension for it — see the bundled `plan-mode.ts` example.
+
+## model
+
+The AI brain that powers Pi. Models are created by companies like Anthropic (Claude), OpenAI (GPT), and Google (Gemini). Different models have different strengths, speeds, and costs. You choose which model to use with `/model`, and you can switch between them at any time.
+
+## Ollama
+
+A [CLI](#cli) tool for downloading and running [LLMs](#llm) locally on your computer. It works like a package manager for AI models — run `ollama pull llama3.1` to download a model and `ollama run llama3.1` to start chatting with it. Pi can connect to Ollama as a custom [provider](#provider) via `models.json`. See [ollama.com](https://ollama.com/).
+
+## prompt
+
+The message or instruction you type into Pi. A good prompt gives the AI enough context to do what you want. For example: "Add a dark mode toggle to the settings page" or "Explain how authentication works in this project."
+
+## prompt template
+
+A reusable prompt saved as a Markdown file, invoked with a slash [command](#command) like `/summarize`. Prompt templates live globally (`~/.pi/agent/prompts/`) or per-project (`.pi/prompts/`), and support positional arguments like `$1` and `$ARGUMENTS`.
+
+## provider
+
+A company or service that hosts AI [models](#model). Anthropic, OpenAI, and Google are providers. Pi supports many providers out of the box, plus self-hosted options like Ollama and LM Studio for running models locally.
+
+## session
+
+A single conversation with Pi, saved as a JSONL file under `~/.pi/agent/sessions/`. Each session has its own context and history, stored as a tree so you can branch and revisit earlier points with `/tree`. You can run multiple sessions in parallel, and you can share a session with others using `/share`.
+
+## skill
+
+A reusable set of instructions packaged as a `SKILL.md` file, following the open [agentskills.io](https://agentskills.io) standard. Skills are loaded on-demand by Pi when they're relevant to the current task, or invoked directly with `/skill:name`. Think of them as specialized knowledge packs — for example, a skill that knows how to draft release notes or set up a new React component.
+
+## text editor
+
+A program for writing and editing plain text files. You'll need one for viewing and editing Pi's [config](#config) files, though Pi itself handles most file creation and editing.
+
+A few popular cross-platform editors (all free): [VS Code](https://code.visualstudio.com), [Cursor](https://cursor.com), [Zed](https://zed.dev), and [Windsurf](https://windsurf.com/editor). If you don't want to install anything extra, your operating system includes one: TextEdit on macOS (set it to plain text mode in Settings), Notepad on Windows, or gedit/Kate/nano on Linux.
+
+## tool
+
+A capability that Pi's AI agent can use. Built-in tools include `read`, `write`, `edit`, `bash`, `grep`, `find`, and `ls`. [Extensions](#extension) can register custom tools, and the [pi-mcp-adapter](#mcp) package exposes MCP tools through a proxy.
+
+## trust
+
+Pi's gate on loading project-local resources, shown as a one-time prompt the first time you start Pi in a directory containing project-specific settings, extensions, skills, or prompt templates. It's not a per-action permission system — once a project is trusted, Pi doesn't pause before individual commands or edits the way some other agent tools do. See the Trust lesson for the full picture.
+
+## branch
+
+A parallel version of your project. Branches let you try changes without affecting the main codebase. When you're happy with a branch, you can merge it into the main branch. The `git checkout -b <name>` command creates a new branch. (Not to be confused with Pi's own session [branching](/lessons/branching), which is a different, session-level concept.)
+
+## commit
+
+A saved snapshot of your project at a point in time. Every commit has a message describing what changed and why. Think of it as a checkpoint you can return to. Use `git add` to stage changes, then `git commit -m "message"` to save them.
+
+## fork
+
+A copy of someone else's repository that lives in your own GitHub account. Forking lets you experiment with changes to a project without affecting the original. When you're ready, you can open a pull request to propose your changes.
+
+## repository
+
+**Repo.** A folder that Git tracks — containing your project files and their complete history. Repositories can be local (on your machine) or remote (on GitHub). Use `git init` to start tracking a folder, or `git clone` to copy a remote repo locally.
+
+## TUI
+
+**Terminal User Interface.** A text-based interface that runs inside your terminal. Pi's interactive mode is a TUI — it looks like a chat app but runs entirely in the terminal, no mouse needed. Compare with [GUI](#gui) and [CLI](#cli).

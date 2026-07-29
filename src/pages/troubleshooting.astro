@@ -7,9 +7,99 @@ import Base from "../layouts/Base.astro";
 export const prerender = true;
 ---
 
-<Base title="Utroubleshooting" description="Coming soon.">
-  <article class="prose dark:prose-invert prose-stone max-w-none">
-    <h1>Utroubleshooting</h1>
-    <p>Coming soon.</p>
+<Base title="Troubleshooting" description="Tips for solving problems with Pi and this course.">
+  <div class="mb-6">
+    <a href="/" class="text-sm text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+      &larr; All lessons
+    </a>
+  </div>
+
+  <header class="mb-8">
+    <h1 class="text-3xl font-bold">Troubleshooting</h1>
+    <p class="text-gray-600 dark:text-stone-400 mt-2">Tips for solving problems with Pi and this course.</p>
+  </header>
+
+  <article class="prose dark:prose-invert max-w-none">
+    <h2 id="using-pi-to-solve-problems"><a href="#using-pi-to-solve-problems" class="heading-anchor">Using Pi to solve problems</a></h2>
+    <p>
+      When you run into trouble — whether it's an error message you don't
+      understand, a lesson that isn't working, or something broken in your own
+      project — try asking Pi to help you figure it out. That's what it's for.
+    </p>
+    <p>Here are some things Pi can do to help you debug:</p>
+    <ul>
+      <li>Read error messages and explain what they mean</li>
+      <li>Search your codebase for relevant files and functions</li>
+      <li>Run commands and inspect the output</li>
+      <li>Check logs, config files, and environment variables</li>
+      <li>Suggest fixes and apply them directly</li>
+    </ul>
+    <p>
+      Instead of trying to solve everything yourself, describe the problem to
+      Pi and let it investigate. You can paste in an error message, point it
+      at a file, or just say "something is broken" and let it look around.
+    </p>
+
+    <h2 id="digging-into-the-pi-source"><a href="#digging-into-the-pi-source" class="heading-anchor">Digging into the Pi source</a></h2>
+    <p>
+      Pi is <a href="https://github.com/earendil-works/pi-mono" target="_blank" rel="noopener noreferrer">open source</a>. If you want to understand how a feature works,
+      track down a bug, or just learn by reading real code, the repo is on GitHub.
+    </p>
+    <p>
+      Reading the source is one of the best ways to build a deeper
+      understanding of how Pi works under the hood — how it manages sessions,
+      talks to LLM providers, runs tools, and more.
+    </p>
+    <p>
+      You can also use Pi itself to explore the repo. Clone it, start Pi
+      inside it, and ask questions like "how does project trust work?" or
+      "where is compaction implemented?" It's a great way to learn a codebase
+      you didn't write.
+    </p>
+
+    <h2 id="getting-help-with-pi"><a href="#getting-help-with-pi" class="heading-anchor">Getting help with Pi</a></h2>
+    <p>
+      If you run into a bug or unexpected behavior in Pi itself — crashes,
+      tool errors, model issues — the best place to get help is the official
+      Pi Discord community:
+    </p>
+    <p>
+      <a href="https://discord.com/invite/nKXTsAcmbT" target="_blank" rel="noopener noreferrer">https://discord.com/invite/nKXTsAcmbT</a>
+    </p>
+    <p>
+      The Discord is monitored by the Pi team and community. You can ask
+      questions, report bugs, and see if others have run into the same issue.
+    </p>
+
+    <h2 id="reporting-an-issue-with-pi-school"><a href="#reporting-an-issue-with-pi-school" class="heading-anchor">Reporting an issue with Pi School</a></h2>
+    <p>
+      If you find a problem with this course — a broken lesson, incorrect
+      content, enrollment issues, or anything else on this site — or if you
+      have an idea for making the course better, please share it on GitHub.
+      Bug reports, suggestions, and ideas for new lessons or exercises are all
+      welcome.
+    </p>
+    <p>
+      See the <a href="/contributing">Contributing</a> page for the easiest
+      ways to file an issue, including prefilled templates for bug reports,
+      ideas, and exercise proposals. Pi can also help draft the issue for you
+      based on your session.
+    </p>
+
+    <h2 id="disenroll"><a href="#disenroll" class="heading-anchor">How to reset progress or disenroll</a></h2>
+    <p>
+      If you want to redo lessons you've already completed, visit the <a href="/disenroll">disenroll page</a> and use "Reset progress." This clears all your completions while keeping your student ID and profile, so you can go through the lessons again without re-enrolling.
+    </p>
+    <p>
+      If you want to fully clear your enrollment from this browser, the same page
+      has a "Disenroll completely" option that removes your student ID, progress,
+      and theme color from local storage. You would need to re-enroll to use
+      Pi School again.
+    </p>
+    <p>
+      Note that both options only affect your current browser. There is no
+      account to delete on the server side — your progress record is just a small
+      anonymous entry keyed to your student ID.
+    </p>
   </article>
 </Base>
