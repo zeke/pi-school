@@ -1,0 +1,88 @@
+---
+title: "Sessions"
+slug: sessions
+description: "Manage and resume conversations with Sessions."
+order: 11
+quiz: true
+agentInstructions: |
+  Cover these four topics:
+
+  1. What a session is: an individual conversation with Pi, saved as a
+     JSONL file. Each session has its own history and context. A single
+     project can have many sessions.
+
+  2. Where sessions are stored: ~/.pi/agent/sessions/, organized by
+     working directory. Starting a new one: /new in interactive mode.
+
+  3. Naming and resuming: /name <name> sets a display name for the
+     current session (or set it at startup with --name/-n). /resume opens
+     an interactive picker of past sessions for the current project; `pi
+     -r` opens the same picker at startup; `pi -c` continues the most
+     recent session directly. /session shows info about the current
+     session (file path, ID, message count, tokens, cost).
+
+  4. Sharing: /share uploads the session as a private GitHub gist with a
+     shareable HTML link — this requires GitHub authentication, which the
+     student doesn't need to set up now (full git/GitHub setup is its own
+     exercise later in the course, mention it by name: "Use Git and
+     GitHub"). /export [file] writes the session to HTML or JSONL
+     locally, no GitHub account needed, useful for saving or reviewing a
+     session without sharing it.
+
+  This lesson has no config file to edit. After teaching and quizzing,
+  verify completion with the hands-on exercise: ask the student to name
+  their current session with /name, then read their own session's JSONL
+  file directly from ~/.pi/agent/sessions/ and give a brief summary of
+  what's been covered in the course so far, demonstrating that session
+  files are just readable JSONL, no special CLI export command needed to
+  inspect them.
+---
+
+import AgentPrompt from '../../components/AgentPrompt.astro'
+
+Every conversation you have with Pi is a session. Sessions have their own history and context — the model remembers everything said within a session, but starts fresh in a new one. A single project can have as many sessions as you like.
+
+<AgentPrompt title="Sessions" />
+
+## Where sessions live
+
+Sessions auto-save to `~/.pi/agent/sessions/`, organized by working directory. Each one is a JSONL file with a tree structure — more on the tree part in the next lesson.
+
+## Starting a new session
+
+Type `/new` in the prompt to start fresh. The current session stays in your history; you can always come back to it.
+
+## Naming and resuming sessions
+
+Give a session a name so it's easier to find later:
+
+```
+/name Refactor auth module
+```
+
+Or set it at startup:
+
+```bash
+pi --name "Refactor auth module"
+```
+
+To pick up a past session:
+
+- **`/resume`** — opens an interactive picker of past sessions for the current project.
+- **`pi -r`** — opens the same picker, but at startup from your terminal.
+- **`pi -c`** — skips the picker and continues your most recent session directly.
+
+Type `/session` any time to see info about your current session: file path, session ID, message count, tokens used, and cost.
+
+## Saving and sharing a session
+
+Two different commands, for two different needs:
+
+- **`/export [file]`** — writes the session to HTML or JSONL, saved locally. No account needed. Good for keeping a record or reviewing a session outside the terminal.
+- **`/share`** — uploads the session as a **private GitHub gist** with a shareable HTML link. This needs GitHub authentication, which we haven't set up yet — you'll get to the full git/GitHub setup in the "Use Git and GitHub" exercise later in the course. For now, just know the command exists.
+
+## Exercise: read your own session file
+
+Session files aren't locked behind a special export command — they're just JSONL, readable directly.
+
+<AgentPrompt title="Sessions" prompt={"Name this session, then read your own session's JSONL file from ~/.pi/agent/sessions/ and summarize what we've covered in the course so far."} />
