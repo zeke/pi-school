@@ -1,0 +1,105 @@
+---
+title: "Trust"
+slug: trust
+description: "Understand Pi's one-time project trust prompt."
+order: 4
+quiz: true
+agentInstructions: |
+  Cover these four topics:
+
+  1. What project trust is: the one-time prompt Pi shows on interactive
+     startup when a directory has project-local resources that require
+     trust (.pi/settings.json, .pi/extensions, .pi/skills, .pi/prompts,
+     .pi/themes, .pi/SYSTEM.md, .pi/APPEND_SYSTEM.md, or a project
+     .agents/skills directory). A bare .pi directory with none of those
+     doesn't trigger it. Trusting a project lets Pi load those resources;
+     declining skips them. AGENTS.md/CLAUDE.md context files load either
+     way, regardless of trust.
+
+  2. The defaultProjectTrust global setting (values: "ask" the default,
+     "always", "never") and where saved per-directory decisions live:
+     ~/.pi/agent/trust.json. The closest saved decision on the current or
+     a parent directory wins over the global default.
+
+  3. /trust saves a trust decision for future sessions (writes
+     ~/.pi/agent/trust.json only — restart pi for it to take effect in the
+     current session). --approve/-a and --no-approve/-na override project
+     trust for a single run, which matters for non-interactive modes (-p,
+     --mode json, --mode rpc) since they never show a trust prompt.
+
+  4. The philosophy difference: project trust is a one-time, per-directory
+     gate on loading resources, not a per-action permission system. Once a
+     project is trusted, Pi doesn't pause before individual bash commands,
+     edits, or file reads the way some other agent tools do with granular
+     allow/ask/deny rules for every action. Students who want that
+     behavior back can look at the permission-gate.ts example extension,
+     which intercepts tool_call events and prompts before risky bash
+     commands like rm -rf, sudo, or chmod 777.
+
+  Trust decisions are usually made through the interactive prompt or
+  /trust, not by hand-editing JSON, so there's no config file to write or
+  verify here. After teaching and quizzing, verify completion by asking
+  the student to describe, in their own words, what happens the next time
+  they start Pi in a project directory they've already trusted.
+---
+
+import AgentPrompt from '../../components/AgentPrompt.astro'
+
+Pi is a local agent — it runs with your permissions and reads and writes files directly. Before it loads any project-specific configuration, it wants your explicit okay. That's project trust.
+
+<AgentPrompt title="Trust" />
+
+## What triggers a trust prompt
+
+Pi checks the current directory for project-local resources that require trust:
+
+- `.pi/settings.json`
+- `.pi/extensions`, `.pi/skills`, `.pi/prompts`, or `.pi/themes`
+- `.pi/SYSTEM.md` or `.pi/APPEND_SYSTEM.md`
+- a project `.agents/skills` directory (in the current directory or an ancestor)
+
+If none of these exist, there's nothing to trust and Pi starts normally. A bare `.pi` directory with none of the above doesn't count.
+
+If Pi finds one of these and doesn't already have a saved decision for the directory (or a parent of it), it asks you, right there in the terminal, whether to trust the project. Say yes for your own projects. Say no if you've just cloned something you haven't reviewed yet.
+
+Declining trust doesn't stop Pi from working — it just skips loading the project's local settings, extensions, skills, prompts, and themes for that session. `AGENTS.md` and `CLAUDE.md` context files load either way.
+
+## Saving your decision
+
+Answering the prompt once doesn't save it for next time. To do that, run:
+
+```
+/trust
+```
+
+inside a session. This writes your decision to `~/.pi/agent/trust.json`, keyed by directory, and can also cover the immediate parent folder. It only writes the file — it doesn't reload your current session, so restart `pi` for the change to take effect.
+
+## Setting a default
+
+If you'd rather not be asked at all, set `defaultProjectTrust` in your global settings (`~/.pi/agent/settings.json`):
+
+```json
+{
+  "defaultProjectTrust": "always"
+}
+```
+
+| Value | Behavior |
+|---|---|
+| `"ask"` | Default. Prompts when there's no saved decision. |
+| `"always"` | Trusts every project automatically. |
+| `"never"` | Never trusts a project's local resources. |
+
+A saved decision in `trust.json` for the current or a parent directory always takes priority over this default.
+
+## Overriding for one run
+
+Non-interactive modes (`-p`, `--mode json`, `--mode rpc`) never show a trust prompt — there's no terminal to ask in. Without a saved decision, `"ask"` and `"never"` both skip trust-gated resources, while `"always"` loads them. To override this for a single command, use `--approve`/`-a` (trust just for this run) or `--no-approve`/`-na` (skip trust just for this run).
+
+## Not a per-action permission system
+
+If you've used other agent tools, you may expect a grid of allow/ask/deny rules for individual commands — one rule for `git push`, another for `rm`, another for editing files outside the project. Pi doesn't work that way. Trust is a single, one-time gate on whether Pi loads a project's local configuration at all. Once you've trusted a project, Pi doesn't pause before running bash commands or editing files the way some other tools pause before every risky action.
+
+If you want that kind of per-action confirmation back, it's not a built-in setting — it's an extension. The bundled `permission-gate.ts` example shows the pattern: it watches for `tool_call` events, checks bash commands against a few dangerous patterns (`rm -rf`, `sudo`, `chmod 777`, and similar), and prompts before letting them run.
+
+<AgentPrompt title="Trust" prompt={`Let's check that the "Trust" lesson is complete.`} />
