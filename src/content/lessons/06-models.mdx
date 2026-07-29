@@ -38,44 +38,6 @@ agentInstructions: |
      CLOUDFLARE_ACCOUNT_ID, more limited since it only hosts certain
      models.
 
-  5. Context windows: what they are (the amount of text a model can see
-     at once, measured in tokens), how they differ between models (large
-     flagship models often have 128K-1M+ token windows, while
-     smaller/cheaper or free models may have far less), why it matters,
-     and what compaction is: Pi automatically summarizes older context
-     when the context window is close to full to free up space, so the
-     session can continue. This is controlled by three settings:
-     compaction.enabled (default true), compaction.reserveTokens (tokens
-     held back for the response, default 16384), and
-     compaction.keepRecentTokens (recent tokens kept unsummarized, default
-     20000). Students can also trigger it manually with /compact. Give
-     practical guidance: with big models this rarely matters; with
-     smaller/free models, keep sessions focused, start fresh sessions for
-     unrelated tasks, and watch for signs the model seems to have lost
-     earlier context.
-
-  6. Reading the context meter in the footer, which looks something like
-     91.1%/1.0M (auto): 1.0M is the model's context window, 91.1% is how
-     full it is right now, and (auto) means auto-compaction is enabled.
-     It turns red as a warning near the limit — red is a color threshold,
-     not an error. Auto-compaction only fires once contextTokens exceeds
-     contextWindow - reserveTokens (roughly 98% on a 1M window with the
-     default 16384 reserve), so a red-but-not-full meter still sends the
-     whole conversation to the model.
-
-  7. When a proactive /compact is worth it versus letting auto-compaction
-     handle it. Default to letting auto handle it: it waits until near
-     the limit so you keep maximum useful context before anything is
-     summarized, and since summarization is lossy, fewer compactions mean
-     less cumulative information loss. Proactive /compact is worth it at
-     a clean task boundary before pivoting to unrelated work (a better
-     cut point than a mid-turn auto trigger), to steer the summary with
-     custom instructions (e.g. "/compact focus on the API changes, skip
-     the debugging tangents" — auto can't take instructions), or before a
-     long autonomous run to buy headroom. Avoid it mid-task, especially
-     mid-turn, since a huge single turn produces a low-quality "split
-     turn" summary — better to finish the thought first.
-
   This lesson has no file-system verification step. Completion is
   confirmed by the student demonstrating understanding through the quiz.
 ---
@@ -129,65 +91,6 @@ pi --provider cloudflare-workers-ai --model "@cf/moonshotai/kimi-k2.6"
 
 The "Use an AI gateway" exercise covers the full setup once you've finished the lessons.
 
-## Context and context windows
-
-Every model has a [context window](/glossary#context-window) — the maximum amount of text it can "see" at once during a conversation. This includes your messages, any file contents you've shared, tool outputs, and the model's own responses. It's measured in tokens (roughly ¾ of a word).
-
-As a conversation grows longer, the context window fills up. When it gets close to full, Pi triggers **compaction** — automatically summarizing older parts of the conversation to free up space so the session can continue, working from a summary rather than the full original context. You can also trigger this manually with `/compact`.
-
-Three settings control compaction, in `~/.pi/agent/settings.json` or a project's `.pi/settings.json`:
-
-```json
-{
-  "compaction": {
-    "enabled": true,
-    "reserveTokens": 16384,
-    "keepRecentTokens": 20000
-  }
-}
-```
-
-| Setting | Default | What it does |
-|---|---|---|
-| `enabled` | `true` | Turns auto-compaction on or off. You can still run `/compact` manually if you disable it. |
-| `reserveTokens` | `16384` | Tokens held back so there's room for the model's response. |
-| `keepRecentTokens` | `20000` | How much of the recent conversation stays untouched instead of being summarized. |
-
-Context window sizes vary a lot between models:
-
-- **Large flagship models** (Claude, GPT, Gemini) typically have context windows of 128K tokens or more — some go up to 1 million tokens. At that scale, you can work through long sessions without worrying about running out of space.
-- **Smaller and free models** often have much smaller context windows. That's enough for focused tasks, but it fills up quickly if you're pasting in big files or having a long back-and-forth.
-
-### What this means in practice
-
-With a big flagship model, you often don't need to think about context at all — typical sessions, even complex ones, don't come close to filling the window.
-
-With a smaller or free model, context management matters more:
-
-- **Keep sessions focused.** One task per session is easier on the context window than trying to do everything in one long conversation.
-- **Start fresh for new tasks.** If you've finished one thing and want to move on to something unrelated, start a new session rather than continuing the old one.
-- **Watch for signs of drift.** If the model starts giving responses that seem to ignore earlier instructions or context, the window may be getting full. Starting a fresh session, or running `/compact`, usually helps.
-
-### Reading the context meter
-
-The footer shows something like `91.1%/1.0M (auto)`:
-
-- `1.0M` is the model's context window.
-- `91.1%` is how full the context is right now.
-- `(auto)` means auto-compaction is enabled.
-
-It turns red as a warning near the limit — that's a color threshold, not an error. Auto-compaction only fires once usage passes `contextWindow - reserveTokens`, which works out to roughly 98% on a 1M-token window with the default 16384 reserve. So a red-but-not-full meter still means the whole conversation is being sent to the model; nothing has been cut yet.
-
-### Proactive /compact vs. letting auto handle it
-
-The default is to let auto-compaction handle it. It waits until you're near the limit, so you keep the most useful context for as long as possible, and since summarization is lossy, fewer compactions mean less cumulative information loss.
-
-A proactive `/compact` is worth running:
-
-- **At a clean task boundary**, before pivoting to unrelated work — a better cut point than wherever an auto trigger happens to land mid-turn.
-- **To steer the summary**, since auto-compaction can't take instructions: `/compact focus on the API changes, skip the debugging tangents`.
-- **Before a long autonomous run**, to buy headroom in advance.
-
-Avoid running it mid-task, especially mid-turn — a single huge turn that gets compacted produces a lower-quality "split turn" summary. Better to finish the thought first.
+Every model also has a [context window](/glossary#context-window) — a limit on how much conversation it can hold at once. The next lesson covers what that means in practice and how Pi manages it.
 
 <AgentPrompt title="Models" prompt={`Let's check that the "Models" lesson is complete.`} />
