@@ -129,8 +129,6 @@ Deliberately **not** ported:
 - **Intro video** — opencode.school's homepage has a rainbow-bordered intro
   video above the enrollment widget, hosted on R2. We have no equivalent
   asset (would need to actually record one) — omitted rather than faked
-- **OpenAPI spec / `/api/openapi.json`** — not built yet, not referenced in
-  `/llms.txt`
 - **Exercises content** — the `exercises` content collection exists (schema
   only, matching source) so the API/lib layer works end to end, but no
   exercise MDX files exist yet. Sidebar/homepage exercise sections are
@@ -208,10 +206,14 @@ Pi before Pi is installed, so that lesson has none.
   each field validated against a fixed enum/array where applicable
 - `GET /api/lessons`, `GET /api/lessons/:slug` — lesson content +
   agentInstructions as JSON, quiz boilerplate injected server-side
-- `GET /llms.txt` — plain-text agent discovery document
-
-Not yet built: `/api/exercises`, `/api/exercises/:slug` (no exercise
-content exists yet), `/api/openapi.json`.
+- `GET /api/exercises`, `GET /api/exercises/:slug` — exercise content +
+  agentInstructions as JSON (no exercise MDX files exist yet, so these
+  currently return an empty list / 404s)
+- `GET /api/openapi.json` — OpenAPI 3.1 spec for the full API surface,
+  linked from `/llms.txt`
+- `GET /llms.txt` — plain-text agent discovery document, points agents at
+  `/api/openapi.json` for endpoint details rather than describing them
+  inline
 
 ## Custom domain
 
