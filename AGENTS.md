@@ -187,7 +187,8 @@ complete) should be described as `curl` via the `bash` tool in
 
 The `<AgentPrompt>` component (`src/components/AgentPrompt.astro`) renders
 a copy-paste prompt linking back to the lesson. Every lesson should include
-at least one.
+at least one, except Installation — a student can't paste a prompt into
+Pi before Pi is installed, so that lesson has none.
 
 ## Progress API
 
