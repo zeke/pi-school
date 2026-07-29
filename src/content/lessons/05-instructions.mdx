@@ -1,0 +1,119 @@
+---
+title: "Instructions"
+slug: instructions
+description: "Write custom instructions that Pi follows in every session."
+order: 5
+quiz: true
+agentInstructions: |
+  Cover these four topics:
+
+  1. What AGENTS.md does: it gives Pi standing instructions that apply to
+     every session, loaded as context files at startup.
+
+  2. The difference between the global file (~/.pi/agent/AGENTS.md) and
+     project-level files: Pi also loads AGENTS.md or CLAUDE.md from
+     parent directories walking up from the current working directory,
+     plus the current directory itself. Global is personal and not
+     committed to git; project-level is typically committed and shared
+     with teammates.
+
+  3. What makes a good custom instruction: specific, actionable rules
+     like preferred languages, commit message style, communication
+     preferences, or safety guardrails — not vague statements.
+
+  4. There's no /init command in Pi. To generate a project AGENTS.md, just
+     ask Pi directly (e.g. "scan this project and write an AGENTS.md
+     describing its structure and conventions"). Frame this as consistent
+     with Pi's overall design: it favors talking to the agent in plain
+     language over memorizing dedicated commands for things the agent can
+     already do when asked.
+
+  After teaching and quizzing, verify completion by reading
+  ~/.pi/agent/AGENTS.md and confirming it exists with at least one
+  meaningful custom instruction (not just a placeholder or empty file).
+---
+
+import AgentPrompt from '../../components/AgentPrompt.astro'
+
+Every time Pi starts, it looks for files called `AGENTS.md` (or `CLAUDE.md`) and reads whatever instructions you've written there as context. Think of it as a set of standing orders for your AI assistant — preferences, rules, and context that apply to everything it does.
+
+AGENTS.md has emerged as the closest thing to an industry standard for AI instruction files. Many AI coding tools — not just Pi — look for a file with this name and use its contents as standing instructions. By writing an AGENTS.md, you're creating something portable that works across tools.
+
+## Global vs. project
+
+Pi loads context files from three places, in this order:
+
+- **Global** (`~/.pi/agent/AGENTS.md`) — Applies to every Pi session on your machine. This is your personal preferences file. It's not committed to Git or shared with anyone.
+- **Parent directories** — Pi walks up from your current working directory looking for `AGENTS.md`/`CLAUDE.md` files along the way.
+- **Current directory** — `AGENTS.md` in the project you're actually working in. This one you typically commit to Git so your whole team benefits from the same instructions.
+
+All of these can exist at once — Pi loads them together. In this lesson, we're creating the global one.
+
+## Create your AGENTS.md
+
+<AgentPrompt title="Instructions" />
+
+Pi will create the file and populate it with starter content. Approve the trust prompt if one appears.
+
+## What to put in it
+
+Here's an example of what a global AGENTS.md might look like. Notice it's not just technical rules: it includes personal context, communication preferences, and writing style alongside coding conventions:
+
+```markdown
+## About me
+
+- My name is Ren. I'm a frontend developer based in Melbourne.
+- My GitHub username is `rendev` and my email is `ren@example.com`.
+- I primarily work in TypeScript and Python.
+
+## Communication
+
+- Be concise. Don't oversell changes or use fancy words like
+  "comprehensive", "utilize", "streamline", or "leverage".
+- Never use em dashes. Use commas, colons, or separate sentences instead.
+- If your last message included URLs, list them at the end so I can
+  open them easily.
+
+## Writing
+
+- When writing pull request descriptions, start with "This PR..." and
+  keep it to 2-3 sentences.
+- When writing markdown, avoid headings smaller than H2 and don't
+  use bold for emphasis.
+
+## Working with Git
+
+- Always use semantic commit prefixes (feat:, fix:, docs:, etc.).
+- Never push to the main branch. Always push to a feature branch.
+- Run the project's lint script before committing, if one exists.
+```
+
+This is just a starting point. Your instructions can cover anything: how you like to communicate, your preferred tools, personal context the agent should know, writing style, safety rules, or coding conventions. The more specific your instructions, the better Pi will work for you.
+
+## Edit it anytime
+
+Your AGENTS.md is a plain text file. Ask Pi to update it whenever you want to add, change, or remove rules.
+
+For example:
+
+```
+Add a rule to my global AGENTS.md: always use semantic commit messages when making git commits.
+```
+
+Restart `pi`, or run `/reload`, to pick up changes without restarting.
+
+## Writing a project AGENTS.md
+
+Pi has no `/init` command for generating a project-specific AGENTS.md. Instead, just ask directly:
+
+```
+Scan this project and write an AGENTS.md describing its structure, conventions, and tech stack.
+```
+
+This is a good example of how Pi generally works: rather than memorizing a dedicated command for every task, you describe what you want in plain language and Pi figures out how to do it with the tools it already has (reading files, listing directories, writing the result).
+
+The project AGENTS.md is meant to be committed to Git. It helps Pi, and your teammates' Pi sessions, understand the project better.
+
+Once your global AGENTS.md exists at `~/.pi/agent/AGENTS.md`, this lesson is complete.
+
+<AgentPrompt title="Instructions" prompt={`Let's check that the "Instructions" lesson is complete.`} />
