@@ -89,6 +89,21 @@ const next = currentIndex < allLessons.length - 1 ? allLessons[currentIndex + 1]
     )}
   </div>
 
+  <!-- Guest action: shown instead of lesson-action to unenrolled visitors, since they can't track progress -->
+  <div id="lesson-guest-action" class="mt-10 pt-6 border-t border-gray-200 dark:border-stone-800 hidden">
+    <p class="text-center text-sm text-gray-500 dark:text-stone-500 mb-4">
+      <a href="/" class="theme-link font-medium underline underline-offset-2">Enroll for free</a> to track your progress through the course.
+    </p>
+    {next && (
+      <a
+        href={`/lessons/${next.data.slug}`}
+        class="theme-button flex w-full justify-center items-center gap-2 rounded-lg px-6 py-4 text-sm font-medium select-none"
+      >
+        Next lesson: {next.data.title} &rarr;
+      </a>
+    )}
+  </div>
+
   <script is:inline define:vars={{ lessonSlug: lesson.data.slug, agentOnly: lesson.data.agentOnly }}>
     (function() {
       var action = document.getElementById("lesson-action");
@@ -102,12 +117,16 @@ const next = currentIndex < allLessons.length - 1 ? allLessons[currentIndex + 1]
       var agentOnlyNext = document.getElementById("lesson-agent-only-next");
       if (!window.school) return;
 
+      var guestAction = document.getElementById("lesson-guest-action");
+
       // Show enroll nudge to unenrolled visitors, hide it once enrolled
       if (!window.school.getStudentId()) {
         if (nudge) nudge.classList.remove("hidden");
+        if (guestAction) guestAction.classList.remove("hidden");
         return;
       }
       if (nudge) nudge.classList.add("hidden");
+      if (guestAction) guestAction.classList.add("hidden");
 
       // Record that this lesson has been visited
       window.school.markLessonVisited(lessonSlug);
