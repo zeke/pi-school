@@ -1,0 +1,142 @@
+---
+title: "Build native Mac apps"
+slug: build-native-mac-apps
+description: "Build a native macOS menu bar app that reads your own Pi usage stats, with the macos-app-skills skill."
+order: 10
+agentInstructions: |
+  Guide the student through scaffolding, building, running, and iterating
+  on a real native macOS app: a menu bar app that reads and summarizes
+  the student's own Pi session data from ~/.pi/agent/sessions/ (JSONL
+  files, one per session, containing message entries with usage/cost
+  data per assistant response — see Pi's session-format docs for the
+  exact schema). Use the macos-app-skills skill
+  (https://github.com/fayazara/macos-app-skills) to do the heavy
+  lifting. Adapt depth and pace to the student's profile.
+
+  This exercise is macOS only. If the student is not on a Mac, explain
+  that building a native Mac app requires macOS and Xcode, and suggest
+  they come back to this one on a Mac. Do not try to fake it on another
+  platform.
+
+  Steps:
+
+  1. Confirm the student is on macOS. Check that Git is available with
+     `git --version`. If it is missing, run `xcode-select --install` to
+     install the Command Line Tools from the session (this opens a system
+     dialog the student confirms once).
+
+  2. Explain the difference between Command Line Tools and full Xcode,
+     plainly: Command Line Tools give you git, clang, and the Swift
+     compiler, but they do NOT include `xcodebuild` or the macOS SDK
+     needed to build an app. A menu bar app needs full Xcode. Detect full
+     Xcode by running `xcodebuild -version`. If it errors with "tool
+     'xcodebuild' requires Xcode" or is not found, tell the student to
+     install Xcode from the Mac App Store (a large one-time download),
+     then re-run `xcodebuild -version` to confirm before continuing.
+
+  3. Install the macos-app-skills skill globally and non-interactively
+     with `npx skills add fayazara/macos-app-skills -g -y` (the `-g`
+     flag installs globally for all projects, and `-y` skips the
+     confirmation prompts). Then run /reload so the skill loads. From
+     here on, rely on the skill's `build` and `macos-patterns` references
+     rather than guessing at xcodebuild flags or macOS APIs.
+
+  4. Scaffold a new Xcode project for a SwiftUI menu bar app (an
+     `MenuBarExtra` scene, not a normal windowed app). Ask the student
+     what they want to call it — "Pi Stats" is a reasonable default if
+     they have no preference.
+
+  5. Understand the data source before writing code: list the student's
+     session files with `ls ~/.pi/agent/sessions/` (they're nested by
+     working directory), read one JSONL file with the read tool, and
+     identify the message entries with `usage` and provider/model fields
+     on assistant responses. Summarize the shape of the data for the
+     student before designing the app around it.
+
+  6. Build the app's first version: a menu bar icon that, when clicked,
+     opens a popover showing basic totals — number of sessions, rough
+     token usage, and which models were used most. Reading and parsing
+     local JSONL files from Swift doesn't require any special library
+     for this scale of data; standard Foundation JSON decoding of each
+     line is enough. Two build gotchas to handle:
+     - Signing: for a local build, either set the student's own
+       development team in Xcode, or disable signing for a debug build
+       by passing `CODE_SIGNING_ALLOWED=NO` to xcodebuild.
+     - Sandboxing: the app needs file read access to
+       `~/.pi/agent/sessions/`, which is outside the default app
+       sandbox. Either disable the sandbox entitlement for this local
+       learning project, or add a user-selected read-only file access
+       entitlement if the student wants to keep sandboxing on.
+
+  7. Build with the `build` skill and run the app. It's a menu bar app
+     with no main window, so tell the student to look for its icon in
+     the macOS menu bar and click it to open the popover.
+
+  8. Help the student make a small improvement using the
+     `macos-patterns` skill. Good options: break down cost by model,
+     show the most recent session's summary, add a refresh button, or
+     filter to today's usage only. Rebuild and run to see the change.
+     Keep it small and achievable.
+
+  Verify completion by confirming a successful xcodebuild of the app,
+  ideally after the student made and rebuilt at least one improvement
+  beyond the initial version.
+---
+
+import AgentPrompt from '../../components/AgentPrompt.astro'
+
+So far you've used Pi to build and deploy web apps, edit files and videos, run AI models, and automate your browser. You can also use Pi to build native macOS apps with Swift and Xcode. In this exercise, you'll build a small menu bar app from scratch that reads and summarizes your own Pi usage — sessions, token counts, and which models you've been using — straight from the JSONL files Pi already saves to your machine. A skill teaches Pi the native patterns it needs along the way.
+
+<AgentPrompt title="Build native Mac apps" prompt={`Let's work on the "Build native Mac apps" exercise together!`} />
+
+## Prerequisites
+
+This exercise is macOS only. Building a native Mac app needs a Mac and Apple's developer tools.
+
+There are two separate things people often confuse:
+
+- **Command Line Tools** give you `git`, `clang`, and the Swift compiler. Pi will install them for you from your session with `xcode-select --install`.
+- **Full Xcode** is the large app from the Mac App Store that includes `xcodebuild` and the macOS SDK. You need it to build an actual `.app`. Command Line Tools alone are not enough for this project.
+
+Pi will check what you have with `xcodebuild -version` and walk you through installing Xcode if it's missing.
+
+## The skill
+
+You'll install [`macos-app-skills`](https://github.com/fayazara/macos-app-skills), a collection of agent skills for building native macOS apps in SwiftUI and AppKit:
+
+```
+npx skills add fayazara/macos-app-skills -g -y
+```
+
+The `-g` flag installs the skill globally (for all your projects) and `-y` skips the interactive prompts, so it installs in one shot. It bundles skills for building from the command line (`build`), native macOS patterns for web developers (`macos-patterns`), settings windows, Sparkle auto-updates, notch overlays, and release pipelines. These encode the hard-won patterns that AI agents usually get wrong, so Pi builds and edits the app correctly instead of guessing.
+
+Run `/reload` after installing so it loads.
+
+## Your own data source
+
+Every Pi session you've had so far is saved as a JSONL file under `~/.pi/agent/sessions/`, organized by working directory. Each file contains a stream of entries — user messages, assistant responses, tool calls — and assistant responses include token usage and cost data per turn. That's a real, personal dataset sitting on your machine already, which makes it a good fit for a small native app: no API, no server, no fake data.
+
+## How the build works
+
+A native Mac app isn't a web project: there's no dev server and no `npm run dev`. "Running it" means compiling an actual `.app` and launching it. Pi uses the [`build` skill](https://github.com/fayazara/macos-app-skills) to compile the project with `xcodebuild` from your session, then opens the result.
+
+A few things are worth knowing before you start, so the output makes sense:
+
+- **`xcodebuild`** is Xcode's command-line build tool. The first build is slower than later ones, since Xcode has to resolve the project's dependencies before it can compile.
+- **Code signing** is macOS's way of stamping an app with a developer identity. For a fresh local project, Pi either sets up your own signing team or turns signing off for a local build. A build failure here is expected and recoverable, not a dead end.
+- **Sandboxing** normally restricts which files an app can read. Since this app needs to read `~/.pi/agent/sessions/`, Pi will either disable the sandbox for this learning project or add the right entitlement.
+- **It's a menu bar app.** There's no window when it launches. You'll find its icon in the menu bar at the top of the screen and click it to open the popover.
+
+## What you'll do
+
+- Set up Apple's developer tools by installing Xcode and the Command Line Tools, with Pi checking what you already have.
+- Install the `macos-app-skills` skill, then run `/reload` so it loads.
+- Scaffold a new SwiftUI menu bar app project.
+- Have Pi read and summarize your own `~/.pi/agent/sessions/` data before writing any code.
+- Build a first version showing session counts, token usage, and model breakdown.
+- Run the app and find its icon in your menu bar.
+- Make a small improvement, like a per-model cost breakdown or a refresh button, then rebuild to see it.
+
+## Go further
+
+Once the basics click, you can point Pi at a completely different native app idea of your own — it doesn't have to be a menu bar app or read local data at all. You can also explore [`macos-app-skills`](https://github.com/fayazara/macos-app-skills)'s other bundled skills — Sparkle auto-updates, settings windows, notch overlays — if you want to take your stats app further and eventually ship it to other people.
