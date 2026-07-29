@@ -1,0 +1,193 @@
+---
+title: "Models"
+slug: models
+description: "Choose and configure AI models in Pi."
+order: 6
+quiz: true
+agentInstructions: |
+  Cover these five topics:
+
+  1. The cost vs. capability tradeoff: state-of-the-art models from
+     Anthropic, OpenAI, and Google deliver better results on complex
+     tasks but cost money per request. Free OpenRouter :free models are
+     less capable but cost nothing. Using Pi well means finding the right
+     balance for what you're trying to do.
+
+  2. How to see and change the current model: it's shown in the footer at
+     the bottom of the terminal, alongside the working directory, session
+     name, and context usage. Switch with /model or Ctrl+L. Shift+Tab
+     cycles the thinking level for models that support it (the editor's
+     border color indicates the current level). Ctrl+P / Shift+Ctrl+P
+     cycles through a shortlist of "scoped" models set via /scoped-models
+     or the enabledModels setting.
+
+  3. Connecting a model via /login: ChatGPT Plus/Pro (Codex) is
+     officially sanctioned by OpenAI for third-party tools like Pi. A free
+     OpenRouter API key with a :free-tagged model works with zero cost and
+     no subscription. Claude Pro/Max and GitHub Copilot both appear as
+     /login options but their terms prohibit routing subscription
+     credentials through third-party tools like Pi — this was covered in
+     the Installation lesson and still applies here.
+
+  4. Cloudflare as a model provider, for students who already have a
+     Cloudflare account: AI Gateway routes requests to OpenAI, Anthropic,
+     and Workers AI through one Cloudflare bill, authenticated with
+     CLOUDFLARE_API_KEY (settable via /login) plus CLOUDFLARE_ACCOUNT_ID
+     and CLOUDFLARE_GATEWAY_ID. Workers AI runs open-source models
+     directly on Cloudflare's network with CLOUDFLARE_API_KEY and
+     CLOUDFLARE_ACCOUNT_ID, more limited since it only hosts certain
+     models.
+
+  5. Context windows: what they are (the amount of text a model can see
+     at once, measured in tokens), how they differ between models (large
+     flagship models often have 128K-1M+ token windows, while
+     smaller/cheaper or free models may have far less), why it matters,
+     and what compaction is: Pi automatically summarizes older context
+     when the context window is close to full to free up space, so the
+     session can continue. This is controlled by three settings:
+     compaction.enabled (default true), compaction.reserveTokens (tokens
+     held back for the response, default 16384), and
+     compaction.keepRecentTokens (recent tokens kept unsummarized, default
+     20000). Students can also trigger it manually with /compact. Give
+     practical guidance: with big models this rarely matters; with
+     smaller/free models, keep sessions focused, start fresh sessions for
+     unrelated tasks, and watch for signs the model seems to have lost
+     earlier context.
+
+  6. Reading the context meter in the footer, which looks something like
+     91.1%/1.0M (auto): 1.0M is the model's context window, 91.1% is how
+     full it is right now, and (auto) means auto-compaction is enabled.
+     It turns red as a warning near the limit — red is a color threshold,
+     not an error. Auto-compaction only fires once contextTokens exceeds
+     contextWindow - reserveTokens (roughly 98% on a 1M window with the
+     default 16384 reserve), so a red-but-not-full meter still sends the
+     whole conversation to the model.
+
+  7. When a proactive /compact is worth it versus letting auto-compaction
+     handle it. Default to letting auto handle it: it waits until near
+     the limit so you keep maximum useful context before anything is
+     summarized, and since summarization is lossy, fewer compactions mean
+     less cumulative information loss. Proactive /compact is worth it at
+     a clean task boundary before pivoting to unrelated work (a better
+     cut point than a mid-turn auto trigger), to steer the summary with
+     custom instructions (e.g. "/compact focus on the API changes, skip
+     the debugging tangents" — auto can't take instructions), or before a
+     long autonomous run to buy headroom. Avoid it mid-task, especially
+     mid-turn, since a huge single turn produces a low-quality "split
+     turn" summary — better to finish the thought first.
+
+  This lesson has no file-system verification step. Completion is
+  confirmed by the student demonstrating understanding through the quiz.
+---
+
+import AgentPrompt from '../../components/AgentPrompt.astro'
+
+The model you choose is probably the single most important factor in how successful your Pi sessions will be. State-of-the-art models from Anthropic, OpenAI, and Google are highly capable — they write better code, reason through complex problems, and make fewer mistakes. But they cost money per request. Free models cost nothing but don't match the top models on difficult tasks. Using Pi well means finding the right balance between cost and capability for what you're trying to do.
+
+An AI [model](/glossary#model) is the engine behind that capability. When you type a message, it's a model that reads it and figures out how to respond — whether that's writing code, explaining an error, or running a command.
+
+<AgentPrompt title="Models" />
+
+## See which model you're using
+
+Your current model is shown in the footer at the bottom of the terminal, along with your working directory, session name, and context usage.
+
+## Change the model
+
+Type `/model` to open the model picker, or press `Ctrl+L`. If the model supports extended thinking, `Shift+Tab` cycles through thinking levels — the editor's border color changes to show the current level.
+
+Once you've picked a shortlist of models you switch between often (via `/scoped-models` or the `enabledModels` setting), `Ctrl+P` and `Shift+Ctrl+P` cycle through just that list, which is faster than opening the full picker every time.
+
+## Connecting a model
+
+As covered in the Installation lesson, `/login` is how you connect a model provider:
+
+- **ChatGPT Plus or Pro** — officially sanctioned by OpenAI for third-party tools like Pi. The safest subscription path.
+- **A free OpenRouter API key** — sign up, grab a key, and pick a model tagged `:free` (for example `google/gemma-4-31b-it:free`). Zero cost, no local compute required.
+- **Claude Pro/Max and GitHub Copilot** both show up as `/login` options, but using them through Pi violates Anthropic's and GitHub's terms of service, respectively — both have real enforcement history. Stick with ChatGPT Codex or an API key.
+
+## Cloudflare
+
+If you already have a Cloudflare account, you can use it as a model provider. One bill, no extra subscriptions.
+
+**AI Gateway** routes requests to OpenAI, Anthropic, and Workers AI through a single Cloudflare bill. Set `CLOUDFLARE_API_KEY` via `/login`, plus `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_GATEWAY_ID` as environment variables:
+
+```bash
+export CLOUDFLARE_API_KEY=...           # or use /login
+export CLOUDFLARE_ACCOUNT_ID=...
+export CLOUDFLARE_GATEWAY_ID=...        # create at dash.cloudflare.com → AI → AI Gateway
+pi --provider cloudflare-ai-gateway --model "claude-sonnet-4-5"
+```
+
+**Workers AI** runs open-source models directly on Cloudflare's network. It's more limited than AI Gateway since it only hosts the models Cloudflare provides, but it's there if you want it:
+
+```bash
+export CLOUDFLARE_API_KEY=...           # or use /login
+export CLOUDFLARE_ACCOUNT_ID=...
+pi --provider cloudflare-workers-ai --model "@cf/moonshotai/kimi-k2.6"
+```
+
+The "Use an AI gateway" exercise covers the full setup once you've finished the lessons.
+
+## Context and context windows
+
+Every model has a [context window](/glossary#context-window) — the maximum amount of text it can "see" at once during a conversation. This includes your messages, any file contents you've shared, tool outputs, and the model's own responses. It's measured in tokens (roughly ¾ of a word).
+
+As a conversation grows longer, the context window fills up. When it gets close to full, Pi triggers **compaction** — automatically summarizing older parts of the conversation to free up space so the session can continue, working from a summary rather than the full original context. You can also trigger this manually with `/compact`.
+
+Three settings control compaction, in `~/.pi/agent/settings.json` or a project's `.pi/settings.json`:
+
+```json
+{
+  "compaction": {
+    "enabled": true,
+    "reserveTokens": 16384,
+    "keepRecentTokens": 20000
+  }
+}
+```
+
+| Setting | Default | What it does |
+|---|---|---|
+| `enabled` | `true` | Turns auto-compaction on or off. You can still run `/compact` manually if you disable it. |
+| `reserveTokens` | `16384` | Tokens held back so there's room for the model's response. |
+| `keepRecentTokens` | `20000` | How much of the recent conversation stays untouched instead of being summarized. |
+
+Context window sizes vary a lot between models:
+
+- **Large flagship models** (Claude, GPT, Gemini) typically have context windows of 128K tokens or more — some go up to 1 million tokens. At that scale, you can work through long sessions without worrying about running out of space.
+- **Smaller and free models** often have much smaller context windows. That's enough for focused tasks, but it fills up quickly if you're pasting in big files or having a long back-and-forth.
+
+### What this means in practice
+
+With a big flagship model, you often don't need to think about context at all — typical sessions, even complex ones, don't come close to filling the window.
+
+With a smaller or free model, context management matters more:
+
+- **Keep sessions focused.** One task per session is easier on the context window than trying to do everything in one long conversation.
+- **Start fresh for new tasks.** If you've finished one thing and want to move on to something unrelated, start a new session rather than continuing the old one.
+- **Watch for signs of drift.** If the model starts giving responses that seem to ignore earlier instructions or context, the window may be getting full. Starting a fresh session, or running `/compact`, usually helps.
+
+### Reading the context meter
+
+The footer shows something like `91.1%/1.0M (auto)`:
+
+- `1.0M` is the model's context window.
+- `91.1%` is how full the context is right now.
+- `(auto)` means auto-compaction is enabled.
+
+It turns red as a warning near the limit — that's a color threshold, not an error. Auto-compaction only fires once usage passes `contextWindow - reserveTokens`, which works out to roughly 98% on a 1M-token window with the default 16384 reserve. So a red-but-not-full meter still means the whole conversation is being sent to the model; nothing has been cut yet.
+
+### Proactive /compact vs. letting auto handle it
+
+The default is to let auto-compaction handle it. It waits until you're near the limit, so you keep the most useful context for as long as possible, and since summarization is lossy, fewer compactions mean less cumulative information loss.
+
+A proactive `/compact` is worth running:
+
+- **At a clean task boundary**, before pivoting to unrelated work — a better cut point than wherever an auto trigger happens to land mid-turn.
+- **To steer the summary**, since auto-compaction can't take instructions: `/compact focus on the API changes, skip the debugging tangents`.
+- **Before a long autonomous run**, to buy headroom in advance.
+
+Avoid running it mid-task, especially mid-turn — a single huge turn that gets compacted produces a lower-quality "split turn" summary. Better to finish the thought first.
+
+<AgentPrompt title="Models" prompt={`Let's check that the "Models" lesson is complete.`} />
