@@ -21,7 +21,18 @@ export const GET: APIRoute = (context) => {
         get: {
           summary: "List all lessons",
           description:
-            "Returns all lessons sorted by order, including agent instructions.",
+            'Returns all lessons sorted by order, including agent instructions. Quiz lessons only include quiz instructions when the student\'s pace is "thorough"; pass studentId to get pace-aware instructions.',
+          parameters: [
+            {
+              name: "studentId",
+              in: "query",
+              required: false,
+              schema: { type: "string" },
+              example: "curious-hacker-2019",
+              description:
+                "Student ID, used to look up pace and shape whether quiz instructions are included. Omitted or unknown IDs default to fast pace (no quiz).",
+            },
+          ],
           responses: {
             "200": {
               description: "Array of all lessons",
@@ -41,7 +52,7 @@ export const GET: APIRoute = (context) => {
         get: {
           summary: "Get a single lesson",
           description:
-            "Returns a single lesson by slug, including agent instructions.",
+            'Returns a single lesson by slug, including agent instructions. Quiz lessons only include quiz instructions when the student\'s pace is "thorough"; pass studentId to get pace-aware instructions.',
           parameters: [
             {
               name: "slug",
@@ -49,6 +60,15 @@ export const GET: APIRoute = (context) => {
               required: true,
               schema: { type: "string" },
               example: "installation",
+            },
+            {
+              name: "studentId",
+              in: "query",
+              required: false,
+              schema: { type: "string" },
+              example: "curious-hacker-2019",
+              description:
+                "Student ID, used to look up pace and shape whether quiz instructions are included. Omitted or unknown IDs default to fast pace (no quiz).",
             },
           ],
           responses: {
@@ -576,6 +596,12 @@ export const GET: APIRoute = (context) => {
               enum: ["rookie", "dabbler", "builder", "sage"],
               description:
                 "Programming experience level. rookie = never written code, dabbler = tinkered a bit, builder = builds regularly, sage = lives in the code.",
+            },
+            pace: {
+              type: "string",
+              enum: ["fast", "thorough"],
+              description:
+                "Course pace. fast (default) skips quizzes and keeps explanations minimal. thorough includes quizzes and fuller explanations.",
             },
             aiTools: {
               type: "array",

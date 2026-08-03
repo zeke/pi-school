@@ -7,6 +7,8 @@
 // `agentInstructions` frontmatter — they list four topics and a
 // verification step, and the API appends this.
 
+import type { StudentProfile } from "./progress";
+
 export const QUIZ_INSTRUCTIONS = `
 After teaching each topic, ask a quiz question to check understanding
 before moving to the next topic. Ask one question at a time and wait for
@@ -20,4 +22,17 @@ tool using \`curl\`, since Pi has no built-in webfetch tool.
 
 export function withQuizInstructions(agentInstructions: string): string {
   return `${agentInstructions.trim()}\n\n${QUIZ_INSTRUCTIONS}`;
+}
+
+/**
+ * Decide whether a lesson's agentInstructions should include the quiz
+ * boilerplate. Quiz lessons only get quizzed for students on "thorough"
+ * pace — "fast" (the default, including no profile/no pace set) skips
+ * quizzes entirely.
+ */
+export function shouldIncludeQuiz(
+  quiz: boolean,
+  pace: StudentProfile["pace"] | undefined,
+): boolean {
+  return quiz && pace === "thorough";
 }

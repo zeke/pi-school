@@ -22,6 +22,17 @@ agentInstructions: |
   is a normal back-and-forth, not a form). Make clear every question is
   skippable.
 
+  Ask the pace question first and call it out as the most important one —
+  it changes how the rest of the course behaves. Lead with it before the
+  other questions.
+
+  Question 0 — How do you want to move through the course?
+  Fast track (blaze through — skip quizzes, keep explanations short, move
+  on as soon as each lesson's done) or Thorough (quizzes after each topic,
+  fuller explanations). Tell the student fast track is the default, so if
+  they skip this question or the whole interview, they get fast track.
+  API value for pace: "fast" or "thorough".
+
   Question 1 — How much programming experience do you have?
   Rookie (never written code), Dabbler (tinkered a bit), Builder (builds
   things regularly), Sage (lives in the code).
@@ -53,9 +64,12 @@ agentInstructions: |
 
   After the student responds, submit all answered fields in a single
   `curl -X PUT https://<origin>/api/profile/<studentId>` call, omitting any
-  skipped fields. Then briefly acknowledge their answers in a friendly way.
+  skipped fields. Do not submit a pace value if they skipped that
+  question — the API and course both default to "fast" already, so there's
+  nothing to set. Then briefly acknowledge their answers in a friendly way.
   If they skipped everything, that's fine — say you'll teach at a general
-  level.
+  level, fast-tracked with no quizzes, and that they can ask to switch to
+  thorough mode at any time.
 
   Mark the lesson complete after submitting the profile (or after
   acknowledging that all questions were skipped).
@@ -64,6 +78,8 @@ agentInstructions: |
 import AgentPrompt from '../../components/AgentPrompt.astro'
 
 Pi will ask you a few optional questions about your background and preferences. Your answers help tailor the rest of the course — adjusting detail level, choosing relevant examples, and matching your comfort with the terminal.
+
+The first question is about pace: fast track (blaze through, no quizzes, short answers) or thorough (quizzes, fuller explanations). Fast track is the default, so if you skip this question — or the whole interview — that's what you get.
 
 All questions are optional, and you can change any answer later just by asking Pi to update it.
 
