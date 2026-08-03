@@ -12,6 +12,7 @@ export interface CompletedLesson {
 }
 
 export interface StudentProfile {
+  pace?: "fast" | "thorough";
   codingExperience?: "rookie" | "dabbler" | "builder" | "sage";
   aiTools?: string[];
   editor?: string;

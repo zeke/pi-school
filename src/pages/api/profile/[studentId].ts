@@ -51,6 +51,7 @@ export const GET: APIRoute = async ({ params }) => {
   });
 };
 
+const VALID_PACE = ["fast", "thorough"];
 const VALID_CODING_EXPERIENCE = ["rookie", "dabbler", "builder", "sage"];
 const VALID_AI_TOOLS = [
   "chatgpt",
@@ -81,6 +82,14 @@ function validateProfile(body: Record<string, unknown>): {
 } {
   const profile: Partial<StudentProfile> = {};
   const errors: string[] = [];
+
+  if ("pace" in body) {
+    if (VALID_PACE.includes(body.pace as string)) {
+      profile.pace = body.pace as StudentProfile["pace"];
+    } else {
+      errors.push(`Invalid pace: must be one of ${VALID_PACE.join(", ")}`);
+    }
+  }
 
   if ("codingExperience" in body) {
     if (VALID_CODING_EXPERIENCE.includes(body.codingExperience as string)) {

@@ -7,19 +7,62 @@ quiz: false
 agentOnly: true
 agentInstructions: |
   This lesson is a short, optional interview. The student's answers are
-  used to personalize the rest of the course. Every question can be
-  skipped — make this clear up front. Tell the student they can update any
-  answer later just by asking you to change it.
+  used to personalize the rest of the course. Tell the student they can
+  update any answer later just by asking you to change it.
 
-  Before asking questions, auto-detect the student's operating system by
+  Before asking anything, auto-detect the student's operating system by
   inspecting the environment (e.g. check uname or the OS environment
   variable). Report it to the API immediately via
   `curl -X PUT https://<origin>/api/profile/<studentId> -d '{"os":"macos"}'`
   (or "linux", "windows"). Do not ask the student what OS they use.
 
-  Ask all of the following questions in a single message, in plain
-  conversational text (Pi's TUI has no structured multi-select UI, so this
-  is a normal back-and-forth, not a form). Make clear every question is
+  This interview has two steps. Do not ask everything at once — step 1 is
+  a single standalone question, and step 2 depends on the answer to it.
+
+  ## Step 1 — pace (ask this alone, wait for a reply)
+
+  Ask only this question first, by itself, in plain conversational text:
+
+  How do you want to move through the course?
+  - Fast track (default) — blaze through, skip quizzes, short
+    explanations, move on as soon as each lesson is done.
+  - Thorough — quizzes after each topic, fuller explanations.
+
+  Make clear fast track is the default: if they skip this question or the
+  whole interview, they get fast track. API value for pace: "fast" or
+  "thorough". Don't submit a pace value to the API if they pick fast or
+  skip — the API already defaults to "fast", so there's nothing to set.
+  Only PUT pace if they explicitly choose "thorough".
+
+  Wait for their reply before continuing to step 2.
+
+  ## Step 2 — depends on their step 1 answer
+
+  ### If they chose fast track (or skipped, or gave an unclear answer)
+
+  Ask exactly one more question, and keep it low-effort:
+
+  "Optional: give me a brief summary of your experience level with AI
+  tools, your background, and your learning goals — or just type 'skip'
+  to skip the interview and get started."
+
+  If they reply with a summary, infer whatever profile fields you
+  reasonably can from their free text (codingExperience, aiTools,
+  terminalComfort, languages, os if mentioned) and submit them in a single
+  `curl -X PUT https://<origin>/api/profile/<studentId>` call. Don't
+  interrogate them for more detail or ask follow-up questions to fill in
+  gaps — infer what you can, leave the rest unset, and move on.
+
+  If they reply "skip" or with nothing usable, don't call the profile API
+  at all (there's nothing to set). Just acknowledge and move on.
+
+  Then mark the lesson complete.
+
+  ### If they chose thorough
+
+  Ask all of the following in a single message, in plain conversational
+  text (Pi's TUI has no structured multi-select UI, so this is a normal
+  back-and-forth, not a form). Make clear every question is still
   skippable.
 
   Question 1 — How much programming experience do you have?
@@ -51,20 +94,22 @@ agentInstructions: |
   API value for languages: array of "javascript", "typescript", "python",
   "go", "rust".
 
-  After the student responds, submit all answered fields in a single
-  `curl -X PUT https://<origin>/api/profile/<studentId>` call, omitting any
-  skipped fields. Then briefly acknowledge their answers in a friendly way.
-  If they skipped everything, that's fine — say you'll teach at a general
-  level.
+  After the student responds, submit all answered fields — including
+  `pace: "thorough"` — in a single
+  `curl -X PUT https://<origin>/api/profile/<studentId>` call, omitting
+  any skipped fields. Then briefly acknowledge their answers in a friendly
+  way. If they skipped everything else, that's fine — say you'll teach at
+  a general level, with quizzes since they chose thorough.
 
-  Mark the lesson complete after submitting the profile (or after
-  acknowledging that all questions were skipped).
+  Then mark the lesson complete.
 ---
 
 import AgentPrompt from '../../components/AgentPrompt.astro'
 
-Pi will ask you a few optional questions about your background and preferences. Your answers help tailor the rest of the course — adjusting detail level, choosing relevant examples, and matching your comfort with the terminal.
+Pi will start by asking how you want to move through the course: fast track (blaze through, no quizzes, short answers) or thorough (quizzes, fuller explanations). Fast track is the default, so if you skip this question — or the whole interview — that's what you get.
 
-All questions are optional, and you can change any answer later just by asking Pi to update it.
+If you go fast track, Pi will ask one more optional, free-form question about your background — or you can just say "skip" and get started right away. If you go thorough, Pi will ask a few more specific questions about your experience and preferences, all still optional.
+
+You can change any answer later just by asking Pi to update it.
 
 <AgentPrompt title="Interview" />

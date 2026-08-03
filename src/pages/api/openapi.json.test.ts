@@ -138,6 +138,7 @@ describe("GET /api/openapi.json", () => {
       schemaProp: string;
       isArray?: boolean;
     }> = [
+      { constName: "VALID_PACE", schemaProp: "pace" },
       { constName: "VALID_CODING_EXPERIENCE", schemaProp: "codingExperience" },
       { constName: "VALID_AI_TOOLS", schemaProp: "aiTools", isArray: true },
       { constName: "VALID_EDITORS", schemaProp: "editor" },
