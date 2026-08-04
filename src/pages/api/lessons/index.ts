@@ -5,6 +5,7 @@
 import { getCollection } from "astro:content";
 import { env } from "cloudflare:workers";
 import type { APIRoute } from "astro";
+import { withFormattingInstructions } from "../../../lib/formatting-instructions";
 import { getProfile } from "../../../lib/progress";
 import {
   shouldIncludeQuiz,
@@ -37,8 +38,10 @@ export const GET: APIRoute = async ({ request }) => {
     order: lesson.data.order,
     quiz: lesson.data.quiz,
     agentInstructions: shouldIncludeQuiz(lesson.data.quiz, profile?.pace)
-      ? withQuizInstructions(lesson.data.agentInstructions)
-      : lesson.data.agentInstructions,
+      ? withQuizInstructions(
+          withFormattingInstructions(lesson.data.agentInstructions),
+        )
+      : withFormattingInstructions(lesson.data.agentInstructions),
   }));
 
   return new Response(JSON.stringify(body), {

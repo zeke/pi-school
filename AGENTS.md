@@ -183,6 +183,16 @@ Every API call an agent needs to make (checking progress, marking a lesson
 complete) should be described as `curl` via the `bash` tool in
 `agentInstructions` — Pi has no built-in `webfetch` tool.
 
+All lessons and exercises also get a formatting note appended at serve
+time, from `src/lib/formatting-instructions.ts`: tell the model to use
+inline single-backtick code for one-off commands/URLs, not triple-backtick
+fenced blocks. Pi's TUI always prints the literal ``` fence lines
+(confirmed against upstream issues like earendil-works/pi#6682, closed
+`not_planned`), and fenced blocks with no specific language (e.g.
+` ```text `) get no syntax highlighting — so a single command in a fenced
+block reads as unrendered markdown. Don't duplicate this note in MDX
+frontmatter.
+
 The `<AgentPrompt>` component (`src/components/AgentPrompt.astro`) renders
 a copy-paste prompt linking back to the lesson. Every lesson should include
 at least one, except Installation — a student can't paste a prompt into
