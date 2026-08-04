@@ -4,6 +4,7 @@
 
 import { getCollection } from "astro:content";
 import type { APIRoute } from "astro";
+import { withFormattingInstructions } from "../../../lib/formatting-instructions";
 
 export const prerender = false;
 
@@ -28,7 +29,9 @@ export const GET: APIRoute = async ({ params }) => {
     slug: exercise.data.slug,
     description: exercise.data.description,
     order: exercise.data.order,
-    agentInstructions: exercise.data.agentInstructions,
+    agentInstructions: withFormattingInstructions(
+      exercise.data.agentInstructions,
+    ),
   };
 
   return new Response(JSON.stringify(body), {
