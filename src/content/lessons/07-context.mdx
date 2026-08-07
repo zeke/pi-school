@@ -45,7 +45,10 @@ agentInstructions: |
      the debugging tangents" — auto can't take instructions), or before a
      long autonomous run to buy headroom. Avoid it mid-task, especially
      mid-turn, since a huge single turn produces a low-quality "split
-     turn" summary — better to finish the thought first.
+     turn" summary — better to finish the thought first. Note that Pi
+     doesn't proactively remind you to compact at a topic switch or
+     before a long run — that judgment call is on the student, using the
+     context meter as the cue.
 
   This lesson has no file-system verification step. Completion is
   confirmed by the student demonstrating understanding through the quiz.
@@ -117,5 +120,7 @@ A proactive `/compact` is worth running:
 - **Before a long autonomous run**, to buy headroom in advance.
 
 Avoid running it mid-task, especially mid-turn — a single huge turn that gets compacted produces a lower-quality "split turn" summary. Better to finish the thought first.
+
+Pi doesn't currently prompt you to compact when you switch topics or start a long run — that judgment call is on you. The context meter in the footer is your best reminder: check it before pivoting to unrelated work or kicking off a long autonomous task.
 
 <AgentPrompt title="Context" prompt={`Let's check that the "Context" lesson is complete.`} />
