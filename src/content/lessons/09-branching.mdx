@@ -27,13 +27,16 @@ agentInstructions: |
      leaf there directly with an empty editor, for jump-and-continue.
      This distinction is easy to miss and worth calling out explicitly.
 
-  4. Branch summaries: when /tree switches away from one branch to
-     another, Pi offers to summarize the abandoned branch and attach it
-     at the new position, so context from the path you left isn't fully
-     lost. Also cover the /tree vs /fork vs /clone distinction: /tree
-     stays in the same session file and shows the full tree; /fork starts
-     a new session file from a previous user message via a selector;
-     /clone duplicates the current active branch into a new session file.
+  4. Branch summaries: they're offered when you leave one branch for
+     another, not just when you open or browse /tree — the trigger is
+     switching branches, not the tree view itself. Pi offers to
+     summarize the abandoned branch and attach it at the new position, so
+     useful context from the branch you're leaving carries forward into
+     the branch you're switching to. Also cover the /tree vs /fork vs
+     /clone distinction: /tree stays in the same session file and shows
+     the full tree; /fork starts a new session file from a previous user
+     message via a selector; /clone duplicates the current active branch
+     into a new session file.
 
   After teaching and quizzing, verify completion with the hands-on
   exercise: have the student ask Pi to do a small task one way, use
@@ -92,7 +95,7 @@ In short: pick a user message to change what was asked; pick anything else to ju
 
 ## Branch summaries
 
-When you use `/tree` to switch away from one branch to another, Pi offers to summarize the branch you're leaving and attach that summary at your new position. This keeps useful context from the abandoned path without replaying the whole thing. You'll be asked to choose: no summary, a default summary, or a summary with custom focus instructions.
+Branch summaries are offered when you leave one branch for another, not just when you open or browse `/tree`. They help carry useful context from the branch you're leaving into the branch you're switching to, without replaying the whole thing. You'll be asked to choose: no summary, a default summary, or a summary with custom focus instructions.
 
 ## /tree vs. /fork vs. /clone
 
