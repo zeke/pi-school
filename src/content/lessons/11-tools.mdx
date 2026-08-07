@@ -29,7 +29,11 @@ agentInstructions: |
      exposes MCP tools through a single proxy tool (~200 tokens) instead
      of registering every tool from every server up front — the agent
      discovers and calls MCP tools on demand via the proxy, and servers
-     only start when actually used.
+     only start when actually used. If Pi fails to load the extension
+     after restart with an error mentioning
+     `@modelcontextprotocol/sdk`, that's a missing peer dependency from
+     a fresh install — fix it with `npm install --prefix ~/.pi/agent/npm
+     @modelcontextprotocol/sdk@^1.29.0` and restart again.
 
   After teaching and quizzing, walk the student through installing
   pi-mcp-adapter and connecting the free Open-Meteo weather MCP server
